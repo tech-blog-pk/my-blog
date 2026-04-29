@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mastering Async/Await in JavaScript — CodePulse</title>
+<meta name="description" content="Most developers only know the basics of async/await. Learn the advanced patterns that will dramatically improve your JavaScript performance.">
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Fraunces:ital,wght@0,300;0,600;1,300&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root { --bg: #f7f6f2; --ink: #1a1a18; --muted: #888880; --accent: #2d6a4f; --accent-light: #d8f3dc; --line: #e0dfd8; --card-bg: #ffffff; --tag-bg: #eeeee8; }
+  body { background: var(--bg); color: var(--ink); font-family: 'DM Sans', sans-serif; font-weight: 300; line-height: 1.7; }
+  nav { position: sticky; top: 0; z-index: 100; background: rgba(247,246,242,0.92); backdrop-filter: blur(12px); border-bottom: 1px solid var(--line); padding: 0 2rem; display: flex; align-items: center; justify-content: space-between; height: 60px; }
+  .logo { font-family: 'DM Mono', monospace; font-size: 1rem; font-weight: 500; color: var(--ink); text-decoration: none; display: flex; align-items: center; gap: 8px; }
+  .logo span { display: inline-block; width: 8px; height: 8px; background: var(--accent); border-radius: 50%; animation: pulse 2s ease-in-out infinite; }
+  @keyframes pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.4); opacity: 0.6; } }
+  .back-btn { font-size: 0.82rem; color: var(--muted); text-decoration: none; transition: color 0.2s; }
+  .back-btn:hover { color: var(--ink); }
+  .article-wrap { max-width: 720px; margin: 0 auto; padding: 60px 2rem 100px; opacity: 0; transform: translateY(20px); animation: fadeUp 0.7s ease forwards 0.1s; }
+  @keyframes fadeUp { to { opacity: 1; transform: translateY(0); } }
+  .article-label { font-family: 'DM Mono', monospace; font-size: 0.72rem; letter-spacing: 0.12em; color: var(--accent); text-transform: uppercase; margin-bottom: 1rem; }
+  .article-title { font-family: 'Fraunces', serif; font-size: clamp(2rem, 5vw, 2.8rem); font-weight: 600; line-height: 1.2; color: var(--ink); margin-bottom: 1.2rem; }
+  .article-subtitle { font-size: 1.05rem; color: var(--muted); line-height: 1.7; margin-bottom: 2rem; }
+  .article-meta { display: flex; align-items: center; gap: 1rem; padding: 1.2rem 0; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); margin-bottom: 3rem; }
+  .author-dot { width: 32px; height: 32px; border-radius: 50%; background: var(--accent-light); display: flex; align-items: center; justify-content: center; font-size: 0.65rem; font-weight: 600; color: var(--accent); }
+  .meta-info { font-size: 0.8rem; color: var(--muted); }
+  .meta-info strong { color: var(--ink); font-weight: 500; }
+  .post-tags { display: flex; gap: 6px; margin-left: auto; }
+  .tag { background: var(--tag-bg); color: var(--muted); font-size: 0.7rem; padding: 3px 10px; border-radius: 100px; font-family: 'DM Mono', monospace; }
+  .article-body h2 { font-family: 'Fraunces', serif; font-size: 1.5rem; font-weight: 600; color: var(--ink); margin: 2.5rem 0 1rem; }
+  .article-body h3 { font-family: 'DM Mono', monospace; font-size: 0.85rem; letter-spacing: 0.06em; color: var(--accent); text-transform: uppercase; margin: 2rem 0 0.8rem; }
+  .article-body p { font-size: 0.95rem; color: #333330; line-height: 1.85; margin-bottom: 1.3rem; }
+  .article-body strong { font-weight: 500; color: var(--ink); }
+  .code-block { background: var(--ink); border-radius: 10px; margin: 1.5rem 0; overflow: hidden; }
+  .code-header { display: flex; align-items: center; justify-content: space-between; padding: 10px 16px; border-bottom: 1px solid rgba(255,255,255,0.08); }
+  .code-lang { font-family: 'DM Mono', monospace; font-size: 0.65rem; letter-spacing: 0.1em; text-transform: uppercase; color: #74c69d; }
+  .code-dots { display: flex; gap: 5px; }
+  .code-dots span { width: 8px; height: 8px; border-radius: 50%; }
+  .code-dots span:nth-child(1) { background: #ff5f57; }
+  .code-dots span:nth-child(2) { background: #febc2e; }
+  .code-dots span:nth-child(3) { background: #28c840; }
+  pre { padding: 1.2rem 1.5rem; overflow-x: auto; }
+  code { font-family: 'DM Mono', monospace; font-size: 0.82rem; line-height: 1.7; color: #e8e6e0; }
+  .kw { color: #74c69d; } .fn { color: #95d5b2; } .str { color: #f4a261; } .cm { color: #555550; font-style: italic; } .num { color: #f4a261; }
+  .callout { background: var(--accent-light); border-left: 3px solid var(--accent); border-radius: 0 8px 8px 0; padding: 1rem 1.2rem; margin: 1.5rem 0; }
+  .callout p { margin: 0; font-size: 0.88rem; color: #1a4a35; }
+  .callout strong { color: var(--accent); }
+  .divider { border: none; border-top: 1px solid var(--line); margin: 2.5rem 0; }
+  .next-article { background: var(--card-bg); border: 1px solid var(--line); border-radius: 12px; padding: 1.5rem; margin-top: 4rem; display: flex; align-items: center; justify-content: space-between; text-decoration: none; transition: transform 0.2s, box-shadow 0.2s; }
+  .next-article:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(0,0,0,0.07); }
+  .next-label { font-family: 'DM Mono', monospace; font-size: 0.65rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); margin-bottom: 4px; }
+  .next-title { font-family: 'Fraunces', serif; font-size: 1rem; font-weight: 600; color: var(--ink); }
+  footer { border-top: 1px solid var(--line); padding: 2rem; display: flex; align-items: center; justify-content: space-between; max-width: 720px; margin: 0 auto; }
+  .footer-logo { font-family: 'DM Mono', monospace; font-size: 0.85rem; color: var(--muted); }
+  .footer-copy { font-size: 0.72rem; color: var(--line); }
+  @media (max-width: 600px) { .post-tags { display: none; } }
+</style>
+</head>
+<body>
+<nav>
+  <a class="logo" href="index.html"><span></span>CodePulse</a>
+  <a class="back-btn" href="index.html">← Back to Articles</a>
+</nav>
+
+<div class="article-wrap">
+  <p class="article-label">// JavaScript</p>
+  <h1 class="article-title">Mastering Async/Await: Patterns You're Probably Missing</h1>
+  <p class="article-subtitle">Most developers only know the basics of async/await. The real performance gains come from parallel execution, smart error handling, and patterns that rarely get covered in tutorials.</p>
+
+  <div class="article-meta">
+    <div class="author-dot">AK</div>
+    <div class="meta-info"><strong>Ali Khan</strong> · Apr 22, 2026 · 8 min read</div>
+    <div class="post-tags"><span class="tag">JavaScript</span><span class="tag">Async</span><span class="tag">Performance</span></div>
+  </div>
+
+  <div class="article-body">
+    <p>Async/await transformed the way we write JavaScript. It replaced callback hell and made Promise chains readable. But most developers stop at the basics — and that means they're leaving serious performance gains on the table.</p>
+    <p>In this article, we'll cover five patterns that go beyond the basics and help you write faster, cleaner, and more resilient async JavaScript.</p>
+
+    <h2>1. What Is Async/Await, Really?</h2>
+    <p>Async/await is <strong>syntactic sugar over Promises</strong>. When you use <code>await</code>, JavaScript pauses that function until the Promise resolves — but it does not block the entire program.</p>
+    <div class="code-block">
+      <div class="code-header"><div class="code-dots"><span></span><span></span><span></span></div><span class="code-lang">JavaScript</span></div>
+      <pre><code><span class="cm">// An async function always returns a Promise</span>
+<span class="kw">async function</span> <span class="fn">getData</span>() {
+  <span class="kw">const</span> response = <span class="kw">await</span> fetch(<span class="str">'https://api.example.com/data'</span>);
+  <span class="kw">const</span> data = <span class="kw">await</span> response.json();
+  <span class="kw">return</span> data;
+}</code></pre>
+    </div>
+    <div class="callout"><p><strong>Key Rule:</strong> Every async function returns a Promise — even if you return a plain value. JavaScript wraps it automatically.</p></div>
+
+    <h2>2. Parallel Execution with Promise.all()</h2>
+    <p>This is the most impactful pattern most developers miss. If you have multiple async operations that <strong>don't depend on each other</strong>, run them in parallel — not one after another.</p>
+    <h3>❌ Wrong Way — Sequential (Slow)</h3>
+    <div class="code-block">
+      <div class="code-header"><div class="code-dots"><span></span><span></span><span></span></div><span class="code-lang">JavaScript — Avoid this</span></div>
+      <pre><code><span class="kw">async function</span> <span class="fn">loadDashboard</span>() {
+  <span class="cm">// Each awaits the previous — 3 seconds total</span>
+  <span class="kw">const</span> user  = <span class="kw">await</span> <span class="fn">getUser</span>();   <span class="cm">// 1 second</span>
+  <span class="kw">const</span> posts = <span class="kw">await</span> <span class="fn">getPosts</span>(); <span class="cm">// 1 second</span>
+  <span class="kw">const</span> stats = <span class="kw">await</span> <span class="fn">getStats</span>(); <span class="cm">// 1 second</span>
+  <span class="kw">return</span> { user, posts, stats };
+}</code></pre>
+    </div>
+    <h3>✅ Right Way — Parallel (3x Faster)</h3>
+    <div class="code-block">
+      <div class="code-header"><div class="code-dots"><span></span><span></span><span></span></div><span class="code-lang">JavaScript — Do this</span></div>
+      <pre><code><span class="kw">async function</span> <span class="fn">loadDashboard</span>() {
+  <span class="cm">// All three run at the same time — ~1 second total</span>
+  <span class="kw">const</span> [user, posts, stats] = <span class="kw">await</span> Promise.all([
+    <span class="fn">getUser</span>(),
+    <span class="fn">getPosts</span>(),
+    <span class="fn">getStats</span>()
+  ]);
+  <span class="kw">return</span> { user, posts, stats };
+}</code></pre>
+    </div>
+    <p>By using <strong>Promise.all()</strong>, all three requests fire simultaneously. This can make your app feel dramatically faster, especially on slower connections.</p>
+
+    <hr class="divider">
+
+    <h2>3. Error Handling Done Right</h2>
+    <p>Unhandled async errors are one of the most common bugs in JavaScript apps. Always wrap your async operations in try/catch — and don't forget to check HTTP status codes.</p>
+    <div class="code-block">
+      <div class="code-header"><div class="code-dots"><span></span><span></span><span></span></div><span class="code-lang">JavaScript</span></div>
+      <pre><code><span class="kw">async function</span> <span class="fn">fetchUser</span>(id) {
+  <span class="kw">try</span> {
+    <span class="kw">const</span> response = <span class="kw">await</span> fetch(<span class="str">`/api/users/${id}`</span>);
+
+    <span class="cm">// fetch() doesn't throw on 404 — you must check</span>
+    <span class="kw">if</span> (!response.ok) {
+      <span class="kw">throw new</span> Error(<span class="str">`Server error: ${response.status}`</span>);
+    }
+    <span class="kw">return await</span> response.json();
+
+  } <span class="kw">catch</span> (error) {
+    console.error(<span class="str">'Failed to fetch user:'</span>, error.message);
+    <span class="kw">return null</span>;
+  }
+}</code></pre>
+    </div>
+    <div class="callout"><p><strong>Common mistake:</strong> fetch() only throws on network failures. A 404 or 500 response does NOT throw — always check <code>response.ok</code> manually.</p></div>
+
+    <h2>4. Promise.allSettled() — When Partial Failure Is Okay</h2>
+    <p>Promise.all() fails fast — if one Promise rejects, everything fails. Sometimes you want results from what succeeded, even if some failed. That's <strong>Promise.allSettled()</strong>.</p>
+    <div class="code-block">
+      <div class="code-header"><div class="code-dots"><span></span><span></span><span></span></div><span class="code-lang">JavaScript</span></div>
+      <pre><code><span class="kw">const</span> results = <span class="kw">await</span> Promise.allSettled([
+  <span class="fn">fetchUser</span>(),
+  <span class="fn">fetchPosts</span>(),
+  <span class="fn">fetchComments</span>()
+]);
+
+results.forEach((result, index) => {
+  <span class="kw">if</span> (result.status === <span class="str">'fulfilled'</span>) {
+    console.log(<span class="str">`Request ${index} succeeded:`</span>, result.value);
+  } <span class="kw">else</span> {
+    console.warn(<span class="str">`Request ${index} failed:`</span>, result.reason);
+  }
+});</code></pre>
+    </div>
+
+    <h2>5. Async Loops — The Right Approach</h2>
+    <p>Mixing async/await with <code>.forEach()</code> is a common trap. Use <code>for...of</code> for sequential execution, or <code>Promise.all</code> with <code>.map()</code> for parallel.</p>
+    <div class="code-block">
+      <div class="code-header"><div class="code-dots"><span></span><span></span><span></span></div><span class="code-lang">JavaScript</span></div>
+      <pre><code><span class="kw">const</span> userIds = [<span class="num">1</span>, <span class="num">2</span>, <span class="num">3</span>, <span class="num">4</span>, <span class="num">5</span>];
+
+<span class="cm">// ✅ Parallel — fastest</span>
+<span class="kw">const</span> users = <span class="kw">await</span> Promise.all(
+  userIds.map(id => <span class="fn">fetchUser</span>(id))
+);
+
+<span class="cm">// ✅ Sequential — when order matters</span>
+<span class="kw">for</span> (<span class="kw">const</span> id <span class="kw">of</span> userIds) {
+  <span class="kw">const</span> user = <span class="kw">await</span> <span class="fn">fetchUser</span>(id);
+  <span class="fn">processUser</span>(user);
+}
+
+<span class="cm">// ❌ forEach ignores the Promise — don't use this</span>
+userIds.forEach(<span class="kw">async</span> (id) => {
+  <span class="kw">const</span> user = <span class="kw">await</span> <span class="fn">fetchUser</span>(id);
+});</code></pre>
+    </div>
+
+    <hr class="divider">
+
+    <h2>Summary</h2>
+    <p>Five patterns to remember:</p>
+    <p>✅ <strong>Promise.all()</strong> — run independent operations in parallel<br>
+    ✅ <strong>Promise.allSettled()</strong> — collect all results even if some fail<br>
+    ✅ <strong>Try/catch</strong> — always handle errors in async functions<br>
+    ✅ <strong>Check response.ok</strong> — fetch() doesn't throw on HTTP errors<br>
+    ✅ <strong>for...of over forEach</strong> — for sequential async loops</p>
+    <p>Apply these patterns and your JavaScript will be faster, safer, and much easier to debug. Happy coding!</p>
+  </div>
+
+  <a class="next-article" href="index.html">
+    <div>
+      <div class="next-label">Next Article →</div>
+      <div class="next-title">useEffect vs useLayoutEffect in React</div>
+    </div>
+    <span style="font-size:1.2rem;color:var(--accent)">→</span>
+  </a>
+</div>
+
+<footer>
+  <span class="footer-logo">CodePulse</span>
+  <span class="footer-copy">© 2026</span>
+</footer>
+</body>
+</html>
