@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>useEffect vs useLayoutEffect in React — CodePulse</title>
+<meta name="description" content="Learn the critical difference between useEffect and useLayoutEffect in React, and when to use each one for better performance.">
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Fraunces:ital,wght@0,300;0,600;1,300&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root { --bg: #f7f6f2; --ink: #1a1a18; --muted: #888880; --accent: #2d6a4f; --accent-light: #d8f3dc; --line: #e0dfd8; --card-bg: #ffffff; --tag-bg: #eeeee8; }
+  body { background: var(--bg); color: var(--ink); font-family: 'DM Sans', sans-serif; font-weight: 300; line-height: 1.7; }
+  nav { position: sticky; top: 0; z-index: 100; background: rgba(247,246,242,0.92); backdrop-filter: blur(12px); border-bottom: 1px solid var(--line); padding: 0 2rem; display: flex; align-items: center; justify-content: space-between; height: 60px; }
+  .logo { font-family: 'DM Mono', monospace; font-size: 1rem; font-weight: 500; color: var(--ink); text-decoration: none; display: flex; align-items: center; gap: 8px; }
+  .logo span { display: inline-block; width: 8px; height: 8px; background: var(--accent); border-radius: 50%; animation: pulse 2s ease-in-out infinite; }
+  @keyframes pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.4); opacity: 0.6; } }
+  .back-btn { font-size: 0.82rem; color: var(--muted); text-decoration: none; transition: color 0.2s; }
+  .back-btn:hover { color: var(--ink); }
+  .article-wrap { max-width: 720px; margin: 0 auto; padding: 60px 2rem 100px; opacity: 0; transform: translateY(20px); animation: fadeUp 0.7s ease forwards 0.1s; }
+  @keyframes fadeUp { to { opacity: 1; transform: translateY(0); } }
+  .article-label { font-family: 'DM Mono', monospace; font-size: 0.72rem; letter-spacing: 0.12em; color: var(--accent); text-transform: uppercase; margin-bottom: 1rem; }
+  .article-title { font-family: 'Fraunces', serif; font-size: clamp(2rem, 5vw, 2.8rem); font-weight: 600; line-height: 1.2; color: var(--ink); margin-bottom: 1.2rem; }
+  .article-subtitle { font-size: 1.05rem; color: var(--muted); line-height: 1.7; margin-bottom: 2rem; }
+  .article-meta { display: flex; align-items: center; gap: 1rem; padding: 1.2rem 0; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); margin-bottom: 3rem; }
+  .author-dot { width: 32px; height: 32px; border-radius: 50%; background: var(--accent-light); display: flex; align-items: center; justify-content: center; font-size: 0.65rem; font-weight: 600; color: var(--accent); }
+  .meta-info { font-size: 0.8rem; color: var(--muted); }
+  .meta-info strong { color: var(--ink); font-weight: 500; }
+  .post-tags { display: flex; gap: 6px; margin-left: auto; }
+  .tag { background: var(--tag-bg); color: var(--muted); font-size: 0.7rem; padding: 3px 10px; border-radius: 100px; font-family: 'DM Mono', monospace; }
+  .article-body h2 { font-family: 'Fraunces', serif; font-size: 1.5rem; font-weight: 600; color: var(--ink); margin: 2.5rem 0 1rem; }
+  .article-body h3 { font-family: 'DM Mono', monospace; font-size: 0.85rem; letter-spacing: 0.06em; color: var(--accent); text-transform: uppercase; margin: 2rem 0 0.8rem; }
+  .article-body p { font-size: 0.95rem; color: #333330; line-height: 1.85; margin-bottom: 1.3rem; }
+  .article-body strong { font-weight: 500; color: var(--ink); }
+  .code-block { background: var(--ink); border-radius: 10px; margin: 1.5rem 0; overflow: hidden; }
+  .code-header { display: flex; align-items: center; justify-content: space-between; padding: 10px 16px; border-bottom: 1px solid rgba(255,255,255,0.08); }
+  .code-lang { font-family: 'DM Mono', monospace; font-size: 0.65rem; letter-spacing: 0.1em; text-transform: uppercase; color: #74c69d; }
+  .code-dots { display: flex; gap: 5px; }
+  .code-dots span { width: 8px; height: 8px; border-radius: 50%; }
+  .code-dots span:nth-child(1) { background: #ff5f57; }
+  .code-dots span:nth-child(2) { background: #febc2e; }
+  .code-dots span:nth-child(3) { background: #28c840; }
+  pre { padding: 1.2rem 1.5rem; overflow-x: auto; }
+  code { font-family: 'DM Mono', monospace; font-size: 0.82rem; line-height: 1.7; color: #e8e6e0; }
+  .kw { color: #74c69d; } .fn { color: #95d5b2; } .str { color: #f4a261; } .cm { color: #555550; font-style: italic; }
+  .callout { background: var(--accent-light); border-left: 3px solid var(--accent); border-radius: 0 8px 8px 0; padding: 1rem 1.2rem; margin: 1.5rem 0; }
+  .callout p { margin: 0; font-size: 0.88rem; color: #1a4a35; }
+  .callout strong { color: var(--accent); }
+  .warning { background: #fff3cd; border-left: 3px solid #f4a261; border-radius: 0 8px 8px 0; padding: 1rem 1.2rem; margin: 1.5rem 0; }
+  .warning p { margin: 0; font-size: 0.88rem; color: #7d4e00; }
+  .compare-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin: 1.5rem 0; }
+  .compare-card { background: var(--card-bg); border: 1px solid var(--line); border-radius: 10px; padding: 1.2rem; }
+  .compare-card h4 { font-family: 'DM Mono', monospace; font-size: 0.75rem; letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 0.8rem; }
+  .compare-card.green h4 { color: var(--accent); }
+  .compare-card.orange h4 { color: #f4a261; }
+  .compare-card p { font-size: 0.82rem; color: var(--muted); margin: 0; line-height: 1.6; }
+  .divider { border: none; border-top: 1px solid var(--line); margin: 2.5rem 0; }
+  .next-article { background: var(--card-bg); border: 1px solid var(--line); border-radius: 12px; padding: 1.5rem; margin-top: 4rem; display: flex; align-items: center; justify-content: space-between; text-decoration: none; transition: transform 0.2s, box-shadow 0.2s; }
+  .next-article:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(0,0,0,0.07); }
+  .next-label { font-family: 'DM Mono', monospace; font-size: 0.65rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); margin-bottom: 4px; }
+  .next-title { font-family: 'Fraunces', serif; font-size: 1rem; font-weight: 600; color: var(--ink); }
+  footer { border-top: 1px solid var(--line); padding: 2rem; display: flex; align-items: center; justify-content: space-between; max-width: 720px; margin: 0 auto; }
+  .footer-logo { font-family: 'DM Mono', monospace; font-size: 0.85rem; color: var(--muted); }
+  .footer-copy { font-size: 0.72rem; color: var(--line); }
+  @media (max-width: 600px) { .post-tags { display: none; } .compare-grid { grid-template-columns: 1fr; } }
+</style>
+</head>
+<body>
+<nav>
+  <a class="logo" href="index.html"><span></span>CodePulse</a>
+  <a class="back-btn" href="index.html">← Back to Articles</a>
+</nav>
+
+<div class="article-wrap">
+  <p class="article-label">// React · JavaScript</p>
+  <h1 class="article-title">useEffect vs useLayoutEffect: When Each One Actually Matters</h1>
+  <p class="article-subtitle">Most React developers use useEffect for everything. But there's a subtle — and critical — difference between these two hooks that can cause visual bugs in your UI if you pick the wrong one.</p>
+
+  <div class="article-meta">
+    <div class="author-dot">AK</div>
+    <div class="meta-info"><strong>Ali Khan</strong> · Apr 29, 2026 · 6 min read</div>
+    <div class="post-tags"><span class="tag">React</span><span class="tag">Hooks</span><span class="tag">JavaScript</span></div>
+  </div>
+
+  <div class="article-body">
+
+    <p>React has two hooks that look almost identical on the surface: <strong>useEffect</strong> and <strong>useLayoutEffect</strong>. Both accept a callback and a dependency array. Both run after a component renders. So what's the difference — and does it actually matter?</p>
+    <p>Yes, it matters a lot. Getting this wrong can cause visible flickering in your UI. Let's break it down clearly.</p>
+
+    <h2>1. How React Renders — A Quick Recap</h2>
+    <p>Before we compare the hooks, we need to understand the browser's rendering pipeline. When React updates your component, here's what happens in order:</p>
+    <p>
+      <strong>Step 1:</strong> React calculates the changes (virtual DOM diffing)<br>
+      <strong>Step 2:</strong> React updates the actual DOM<br>
+      <strong>Step 3:</strong> The browser <em>paints</em> — displays the changes on screen<br>
+      <strong>Step 4:</strong> Your effects run
+    </p>
+    <p>The key question is: does your effect run <strong>before or after</strong> the browser paints? That's exactly what separates useEffect from useLayoutEffect.</p>
+
+    <h2>2. useEffect — Runs After Paint</h2>
+    <p><strong>useEffect</strong> runs <em>after</em> the browser has already painted the screen. This means the user sees the updated UI first, and then your effect runs in the background.</p>
+
+    <div class="code-block">
+      <div class="code-header"><div class="code-dots"><span></span><span></span><span></span></div><span class="code-lang">React</span></div>
+      <pre><code><span class="kw">import</span> { useState, useEffect } <span class="kw">from</span> <span class="str">'react'</span>;
+
+<span class="kw">function</span> <span class="fn">UserProfile</span>({ userId }) {
+  <span class="kw">const</span> [user, setUser] = <span class="fn">useState</span>(<span class="kw">null</span>);
+
+  <span class="fn">useEffect</span>(() => {
+    <span class="cm">// Runs AFTER the browser paints</span>
+    <span class="cm">// Perfect for: API calls, subscriptions, timers</span>
+    <span class="fn">fetchUser</span>(userId).then(data => <span class="fn">setUser</span>(data));
+  }, [userId]);
+
+  <span class="kw">return</span> &lt;div&gt;{user ? user.name : <span class="str">'Loading...'</span>}&lt;/div&gt;;
+}</code></pre>
+    </div>
+
+    <div class="callout">
+      <p><strong>Best for:</strong> API calls, data fetching, event listeners, subscriptions, logging, and anything that doesn't need to happen before the user sees the screen.</p>
+    </div>
+
+    <h2>3. useLayoutEffect — Runs Before Paint</h2>
+    <p><strong>useLayoutEffect</strong> runs <em>synchronously</em> after React updates the DOM, but <strong>before</strong> the browser paints. This means you can measure or modify the DOM and the user will never see the intermediate state.</p>
+
+    <div class="code-block">
+      <div class="code-header"><div class="code-dots"><span></span><span></span><span></span></div><span class="code-lang">React</span></div>
+      <pre><code><span class="kw">import</span> { useState, useRef, useLayoutEffect } <span class="kw">from</span> <span class="str">'react'</span>;
+
+<span class="kw">function</span> <span class="fn">Tooltip</span>({ text }) {
+  <span class="kw">const</span> ref = <span class="fn">useRef</span>(<span class="kw">null</span>);
+  <span class="kw">const</span> [position, setPosition] = <span class="fn">useState</span>({ top: <span class="str">0</span>, left: <span class="str">0</span> });
+
+  <span class="fn">useLayoutEffect</span>(() => {
+    <span class="cm">// Runs BEFORE the browser paints</span>
+    <span class="cm">// Measure the DOM element and set position</span>
+    <span class="kw">const</span> rect = ref.current.<span class="fn">getBoundingClientRect</span>();
+    <span class="fn">setPosition</span>({ top: rect.bottom, left: rect.left });
+  }, []);
+
+  <span class="kw">return</span> (
+    &lt;div ref={ref} style={{ top: position.top, left: position.left }}&gt;
+      {text}
+    &lt;/div&gt;
+  );
+}</code></pre>
+    </div>
+
+    <div class="warning">
+      <p><strong>Warning:</strong> useLayoutEffect blocks the browser from painting until it finishes. Heavy work inside it will make your app feel slow. Keep it fast and focused.</p>
+    </div>
+
+    <h2>4. Side-by-Side Comparison</h2>
+
+    <div class="compare-grid">
+      <div class="compare-card green">
+        <h4>useEffect</h4>
+        <p>Runs after browser paint. Non-blocking. Best for async work like API calls, subscriptions, and timers.</p>
+      </div>
+      <div class="compare-card orange">
+        <h4>useLayoutEffect</h4>
+        <p>Runs before browser paint. Blocking. Best for DOM measurements and preventing visual flicker.</p>
+      </div>
+    </div>
+
+    <hr class="divider">
+
+    <h2>5. The Flicker Problem — A Real Example</h2>
+    <p>Here's a practical case where using the wrong hook causes a visible bug. Imagine a component that needs to measure its own width and adjust its layout based on that measurement.</p>
+
+    <h3>❌ With useEffect — causes flicker</h3>
+    <div class="code-block">
+      <div class="code-header"><div class="code-dots"><span></span><span></span><span></span></div><span class="code-lang">React — Causes flicker</span></div>
+      <pre><code><span class="kw">function</span> <span class="fn">ResizableBox</span>() {
+  <span class="kw">const</span> ref = <span class="fn">useRef</span>(<span class="kw">null</span>);
+  <span class="kw">const</span> [width, setWidth] = <span class="fn">useState</span>(<span class="str">0</span>);
+
+  <span class="fn">useEffect</span>(() => {
+    <span class="cm">// Browser paints FIRST with width = 0</span>
+    <span class="cm">// Then this runs — user sees a flicker!</span>
+    <span class="fn">setWidth</span>(ref.current.offsetWidth);
+  }, []);
+
+  <span class="kw">return</span> &lt;div ref={ref} style={{ fontSize: width &gt; <span class="str">400</span> ? <span class="str">'18px'</span> : <span class="str">'14px'</span> }}&gt;
+    Content here
+  &lt;/div&gt;;
+}</code></pre>
+    </div>
+
+    <h3>✅ With useLayoutEffect — no flicker</h3>
+    <div class="code-block">
+      <div class="code-header"><div class="code-dots"><span></span><span></span><span></span></div><span class="code-lang">React — No flicker</span></div>
+      <pre><code><span class="kw">function</span> <span class="fn">ResizableBox</span>() {
+  <span class="kw">const</span> ref = <span class="fn">useRef</span>(<span class="kw">null</span>);
+  <span class="kw">const</span> [width, setWidth] = <span class="fn">useState</span>(<span class="str">0</span>);
+
+  <span class="fn">useLayoutEffect</span>(() => {
+    <span class="cm">// Runs BEFORE paint — user never sees width = 0</span>
+    <span class="fn">setWidth</span>(ref.current.offsetWidth);
+  }, []);
+
+  <span class="kw">return</span> &lt;div ref={ref} style={{ fontSize: width &gt; <span class="str">400</span> ? <span class="str">'18px'</span> : <span class="str">'14px'</span> }}&gt;
+    Content here
+  &lt;/div&gt;;
+}</code></pre>
+    </div>
+
+    <h2>6. The Simple Decision Rule</h2>
+    <p>Here's how to decide which hook to use every time:</p>
+    <p>
+      ✅ <strong>Use useEffect</strong> — for 95% of cases. API calls, subscriptions, logging, timers.<br>
+      ✅ <strong>Use useLayoutEffect</strong> — only when you need to read or write the DOM before the user sees it. Tooltips, animations, measuring element size.
+    </p>
+
+    <div class="callout">
+      <p><strong>Golden Rule:</strong> Start with useEffect. Only switch to useLayoutEffect if you see visual flickering that needs to be fixed.</p>
+    </div>
+
+    <hr class="divider">
+
+    <h2>Summary</h2>
+    <p>The difference is simple but important. <strong>useEffect</strong> is your default — it runs after the browser paints and is perfect for async work. <strong>useLayoutEffect</strong> is a specialized tool — it runs before the browser paints and is used to fix visual flickering when you need to measure or modify the DOM immediately.</p>
+    <p>When in doubt, use useEffect. Your users won't notice the difference in most cases, and your app will stay performant.</p>
+
+  </div>
+
+  <a class="next-article" href="async-await.html">
+    <div>
+      <div class="next-label">← Previous Article</div>
+      <div class="next-title">Mastering Async/Await in JavaScript</div>
+    </div>
+    <span style="font-size:1.2rem;color:var(--accent)">→</span>
+  </a>
+</div>
+
+<footer>
+  <span class="footer-logo">CodePulse</span>
+  <span class="footer-copy">© 2026</span>
+</footer>
+</body>
+</html>
