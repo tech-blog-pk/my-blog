@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CSS Grid vs Flexbox: A Complete Guide — CodePulse</title>
+<meta name="description" content="Learn the difference between CSS Grid and Flexbox, when to use each one, and how to build better layouts with practical examples.">
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Fraunces:ital,wght@0,300;0,600;1,300&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root { --bg: #f7f6f2; --ink: #1a1a18; --muted: #888880; --accent: #2d6a4f; --accent-light: #d8f3dc; --line: #e0dfd8; --card-bg: #ffffff; --tag-bg: #eeeee8; }
+  body { background: var(--bg); color: var(--ink); font-family: 'DM Sans', sans-serif; font-weight: 300; line-height: 1.7; }
+  nav { position: sticky; top: 0; z-index: 100; background: rgba(247,246,242,0.92); backdrop-filter: blur(12px); border-bottom: 1px solid var(--line); padding: 0 2rem; display: flex; align-items: center; justify-content: space-between; height: 60px; }
+  .logo { font-family: 'DM Mono', monospace; font-size: 1rem; font-weight: 500; color: var(--ink); text-decoration: none; display: flex; align-items: center; gap: 8px; }
+  .logo span { display: inline-block; width: 8px; height: 8px; background: var(--accent); border-radius: 50%; animation: pulse 2s ease-in-out infinite; }
+  @keyframes pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.4); opacity: 0.6; } }
+  .back-btn { font-size: 0.82rem; color: var(--muted); text-decoration: none; transition: color 0.2s; }
+  .back-btn:hover { color: var(--ink); }
+  .article-wrap { max-width: 720px; margin: 0 auto; padding: 60px 2rem 100px; opacity: 0; transform: translateY(20px); animation: fadeUp 0.7s ease forwards 0.1s; }
+  @keyframes fadeUp { to { opacity: 1; transform: translateY(0); } }
+  .article-label { font-family: 'DM Mono', monospace; font-size: 0.72rem; letter-spacing: 0.12em; color: var(--accent); text-transform: uppercase; margin-bottom: 1rem; }
+  .article-title { font-family: 'Fraunces', serif; font-size: clamp(2rem, 5vw, 2.8rem); font-weight: 600; line-height: 1.2; color: var(--ink); margin-bottom: 1.2rem; }
+  .article-subtitle { font-size: 1.05rem; color: var(--muted); line-height: 1.7; margin-bottom: 2rem; }
+  .article-meta { display: flex; align-items: center; gap: 1rem; padding: 1.2rem 0; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); margin-bottom: 3rem; }
+  .author-dot { width: 32px; height: 32px; border-radius: 50%; background: var(--accent-light); display: flex; align-items: center; justify-content: center; font-size: 0.65rem; font-weight: 600; color: var(--accent); }
+  .meta-info { font-size: 0.8rem; color: var(--muted); }
+  .meta-info strong { color: var(--ink); font-weight: 500; }
+  .post-tags { display: flex; gap: 6px; margin-left: auto; }
+  .tag { background: var(--tag-bg); color: var(--muted); font-size: 0.7rem; padding: 3px 10px; border-radius: 100px; font-family: 'DM Mono', monospace; }
+  .article-body h2 { font-family: 'Fraunces', serif; font-size: 1.5rem; font-weight: 600; color: var(--ink); margin: 2.5rem 0 1rem; }
+  .article-body h3 { font-family: 'DM Mono', monospace; font-size: 0.85rem; letter-spacing: 0.06em; color: var(--accent); text-transform: uppercase; margin: 2rem 0 0.8rem; }
+  .article-body p { font-size: 0.95rem; color: #333330; line-height: 1.85; margin-bottom: 1.3rem; }
+  .article-body strong { font-weight: 500; color: var(--ink); }
+
+  /* Article image */
+  .article-img { width: 100%; border-radius: 12px; margin: 1.5rem 0; overflow: hidden; }
+  .article-img img { width: 100%; height: auto; display: block; }
+  .img-caption { font-size: 0.78rem; color: var(--muted); text-align: center; margin-top: 0.5rem; font-family: 'DM Mono', monospace; }
+
+  /* Visual demos */
+  .demo-box { background: var(--card-bg); border: 1px solid var(--line); border-radius: 10px; padding: 1.5rem; margin: 1.5rem 0; }
+  .demo-title { font-family: 'DM Mono', monospace; font-size: 0.7rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); margin-bottom: 1rem; }
+  .flex-demo { display: flex; gap: 8px; flex-wrap: wrap; }
+  .grid-demo { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+  .grid-demo-2 { display: grid; grid-template-columns: 200px 1fr; grid-template-rows: 60px 1fr 60px; gap: 8px; height: 200px; }
+  .demo-item { background: var(--accent-light); border: 1px solid var(--accent); border-radius: 6px; padding: 10px; font-size: 0.75rem; color: var(--accent); font-family: 'DM Mono', monospace; display: flex; align-items: center; justify-content: center; }
+  .demo-item.header { grid-column: 1 / -1; background: #b7e4c7; }
+  .demo-item.sidebar { grid-row: 2; background: #d8f3dc; }
+  .demo-item.main { grid-row: 2; background: #f0faf3; }
+  .demo-item.footer { grid-column: 1 / -1; background: #b7e4c7; }
+
+  .code-block { background: var(--ink); border-radius: 10px; margin: 1.5rem 0; overflow: hidden; }
+  .code-header { display: flex; align-items: center; justify-content: space-between; padding: 10px 16px; border-bottom: 1px solid rgba(255,255,255,0.08); }
+  .code-lang { font-family: 'DM Mono', monospace; font-size: 0.65rem; letter-spacing: 0.1em; text-transform: uppercase; color: #74c69d; }
+  .code-dots { display: flex; gap: 5px; }
+  .code-dots span { width: 8px; height: 8px; border-radius: 50%; }
+  .code-dots span:nth-child(1) { background: #ff5f57; }
+  .code-dots span:nth-child(2) { background: #febc2e; }
+  .code-dots span:nth-child(3) { background: #28c840; }
+  pre { padding: 1.2rem 1.5rem; overflow-x: auto; }
+  code { font-family: 'DM Mono', monospace; font-size: 0.82rem; line-height: 1.7; color: #e8e6e0; }
+  .kw { color: #74c69d; } .fn { color: #95d5b2; } .str { color: #f4a261; } .cm { color: #555550; font-style: italic; } .prop { color: #90e0ef; }
+
+  .callout { background: var(--accent-light); border-left: 3px solid var(--accent); border-radius: 0 8px 8px 0; padding: 1rem 1.2rem; margin: 1.5rem 0; }
+  .callout p { margin: 0; font-size: 0.88rem; color: #1a4a35; }
+  .callout strong { color: var(--accent); }
+
+  .compare-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin: 1.5rem 0; }
+  .compare-card { background: var(--card-bg); border: 1px solid var(--line); border-radius: 10px; padding: 1.2rem; }
+  .compare-card h4 { font-family: 'DM Mono', monospace; font-size: 0.75rem; letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 0.8rem; }
+  .compare-card.green h4 { color: var(--accent); }
+  .compare-card.blue h4 { color: #4361ee; }
+  .compare-card p { font-size: 0.82rem; color: var(--muted); margin: 0; line-height: 1.6; }
+
+  .divider { border: none; border-top: 1px solid var(--line); margin: 2.5rem 0; }
+  .next-article { background: var(--card-bg); border: 1px solid var(--line); border-radius: 12px; padding: 1.5rem; margin-top: 4rem; display: flex; align-items: center; justify-content: space-between; text-decoration: none; transition: transform 0.2s, box-shadow 0.2s; }
+  .next-article:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(0,0,0,0.07); }
+  .next-label { font-family: 'DM Mono', monospace; font-size: 0.65rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); margin-bottom: 4px; }
+  .next-title { font-family: 'Fraunces', serif; font-size: 1rem; font-weight: 600; color: var(--ink); }
+  footer { border-top: 1px solid var(--line); padding: 2rem; display: flex; align-items: center; justify-content: space-between; max-width: 720px; margin: 0 auto; }
+  .footer-logo { font-family: 'DM Mono', monospace; font-size: 0.85rem; color: var(--muted); }
+  .footer-copy { font-size: 0.72rem; color: var(--line); }
+  @media (max-width: 600px) { .post-tags { display: none; } .compare-grid { grid-template-columns: 1fr; } .grid-demo-2 { grid-template-columns: 1fr; height: auto; } }
+</style>
+</head>
+<body>
+<nav>
+  <a class="logo" href="index.html"><span></span>CodePulse</a>
+  <a class="back-btn" href="index.html">← Back to Articles</a>
+</nav>
+
+<div class="article-wrap">
+  <p class="article-label">// CSS & Design</p>
+  <h1 class="article-title">CSS Grid vs Flexbox: When to Use Each One</h1>
+  <p class="article-subtitle">Both CSS Grid and Flexbox are powerful layout tools — but they solve different problems. Here's a clear, practical guide to help you choose the right one every time.</p>
+
+  <div class="article-meta">
+    <div class="author-dot">AK</div>
+    <div class="meta-info"><strong>Ali Khan</strong> · May 2, 2026 · 7 min read</div>
+    <div class="post-tags"><span class="tag">CSS</span><span class="tag">Layout</span><span class="tag">Design</span></div>
+  </div>
+
+  <div class="article-body">
+
+    <div class="article-img">
+      <img src="https://images.unsplash.com/photo-1507721999472-8ed4421c4af2?w=800&q=80" alt="CSS Layout Design" loading="lazy">
+      <p class="img-caption">// CSS layout is one of the most important skills in frontend development</p>
+    </div>
+
+    <p>If you've been writing CSS for a while, you've probably asked yourself: <strong>should I use Grid or Flexbox here?</strong> Both are excellent layout systems, but they shine in different situations. Getting this wrong leads to messy, hard-to-maintain CSS.</p>
+    <p>In this article, we'll break down the core differences and give you a simple decision framework you can use every day.</p>
+
+    <h2>1. The Core Difference</h2>
+    <p>The single most important thing to understand is this:</p>
+    <p>
+      <strong>Flexbox</strong> is a <em>one-dimensional</em> layout system — it works in either a row OR a column.<br>
+      <strong>CSS Grid</strong> is a <em>two-dimensional</em> layout system — it works in rows AND columns simultaneously.
+    </p>
+
+    <div class="compare-grid">
+      <div class="compare-card green">
+        <h4>Flexbox — 1D</h4>
+        <p>Controls items along a single axis. Perfect for navigation bars, button groups, and centering content.</p>
+      </div>
+      <div class="compare-card blue">
+        <h4>CSS Grid — 2D</h4>
+        <p>Controls items across both rows and columns. Perfect for page layouts, card grids, and complex designs.</p>
+      </div>
+    </div>
+
+    <h2>2. Flexbox in Action</h2>
+    <p>Flexbox is perfect when you need to align items in a single direction — like a navigation bar or a row of buttons. Here's what it looks like:</p>
+
+    <div class="demo-box">
+      <div class="demo-title">// Flexbox Demo — items in a row</div>
+      <div class="flex-demo">
+        <div class="demo-item">Home</div>
+        <div class="demo-item">About</div>
+        <div class="demo-item">Blog</div>
+        <div class="demo-item">Contact</div>
+      </div>
+    </div>
+
+    <div class="code-block">
+      <div class="code-header"><div class="code-dots"><span></span><span></span><span></span></div><span class="code-lang">CSS</span></div>
+      <pre><code><span class="cm">/* Flexbox — perfect for navigation */</span>
+.<span class="fn">navbar</span> {
+  <span class="prop">display</span>: flex;
+  <span class="prop">align-items</span>: center;
+  <span class="prop">justify-content</span>: space-between;
+  <span class="prop">gap</span>: <span class="str">1rem</span>;
+}
+
+.<span class="fn">nav-links</span> {
+  <span class="prop">display</span>: flex;
+  <span class="prop">gap</span>: <span class="str">2rem</span>;
+  <span class="prop">list-style</span>: none;
+}
+</code></pre>
+    </div>
+
+    <div class="callout">
+      <p><strong>Flexbox shines when:</strong> You need to align items in a row or column, center content, or distribute space between items evenly.</p>
+    </div>
+
+    <h2>3. CSS Grid in Action</h2>
+    <p>CSS Grid is ideal when you need to control both rows and columns at the same time — like a full page layout or a card grid.</p>
+
+    <div class="demo-box">
+      <div class="demo-title">// CSS Grid Demo — page layout</div>
+      <div class="grid-demo-2">
+        <div class="demo-item header">Header</div>
+        <div class="demo-item sidebar">Sidebar</div>
+        <div class="demo-item main">Main Content</div>
+        <div class="demo-item footer">Footer</div>
+      </div>
+    </div>
+
+    <div class="code-block">
+      <div class="code-header"><div class="code-dots"><span></span><span></span><span></span></div><span class="code-lang">CSS</span></div>
+      <pre><code><span class="cm">/* CSS Grid — perfect for page layout */</span>
+.<span class="fn">page-layout</span> {
+  <span class="prop">display</span>: grid;
+  <span class="prop">grid-template-columns</span>: <span class="str">200px 1fr</span>;
+  <span class="prop">grid-template-rows</span>: <span class="str">60px 1fr 60px</span>;
+  <span class="prop">min-height</span>: <span class="str">100vh</span>;
+  <span class="prop">gap</span>: <span class="str">1rem</span>;
+}
+
+.<span class="fn">header</span> { <span class="prop">grid-column</span>: <span class="str">1 / -1</span>; }
+.<span class="fn">footer</span> { <span class="prop">grid-column</span>: <span class="str">1 / -1</span>; }
+</code></pre>
+    </div>
+
+    <h3>Card Grid Example</h3>
+    <div class="demo-box">
+      <div class="demo-title">// CSS Grid Demo — card grid</div>
+      <div class="grid-demo">
+        <div class="demo-item">Card 1</div>
+        <div class="demo-item">Card 2</div>
+        <div class="demo-item">Card 3</div>
+        <div class="demo-item">Card 4</div>
+        <div class="demo-item">Card 5</div>
+        <div class="demo-item">Card 6</div>
+      </div>
+    </div>
+
+    <div class="code-block">
+      <div class="code-header"><div class="code-dots"><span></span><span></span><span></span></div><span class="code-lang">CSS</span></div>
+      <pre><code><span class="cm">/* Responsive card grid */</span>
+.<span class="fn">card-grid</span> {
+  <span class="prop">display</span>: grid;
+  <span class="prop">grid-template-columns</span>: <span class="str">repeat(auto-fit, minmax(250px, 1fr))</span>;
+  <span class="prop">gap</span>: <span class="str">1.5rem</span>;
+}
+</code></pre>
+    </div>
+
+    <div class="callout">
+      <p><strong>CSS Grid shines when:</strong> You need a two-dimensional layout, a full page structure, or a responsive card grid with consistent row heights.</p>
+    </div>
+
+    <hr class="divider">
+
+    <h2>4. Can You Use Both Together?</h2>
+    <p>Absolutely — and you should! The best approach is to use <strong>Grid for the overall page layout</strong> and <strong>Flexbox for the components inside</strong>.</p>
+
+    <div class="code-block">
+      <div class="code-header"><div class="code-dots"><span></span><span></span><span></span></div><span class="code-lang">CSS</span></div>
+      <pre><code><span class="cm">/* Grid for overall layout */</span>
+.<span class="fn">page</span> {
+  <span class="prop">display</span>: grid;
+  <span class="prop">grid-template-columns</span>: <span class="str">250px 1fr</span>;
+}
+
+<span class="cm">/* Flexbox inside a component */</span>
+.<span class="fn">card</span> {
+  <span class="prop">display</span>: flex;
+  <span class="prop">flex-direction</span>: column;
+  <span class="prop">justify-content</span>: space-between;
+}
+
+.<span class="fn">card-footer</span> {
+  <span class="prop">display</span>: flex;
+  <span class="prop">align-items</span>: center;
+  <span class="prop">gap</span>: <span class="str">0.5rem</span>;
+}
+</code></pre>
+    </div>
+
+    <h2>5. The Decision Framework</h2>
+    <p>Use this simple checklist every time you start a new layout:</p>
+    <p>
+      ✅ <strong>Use Flexbox</strong> when arranging items in a single row or column<br>
+      ✅ <strong>Use Flexbox</strong> for navigation bars, button groups, centering<br>
+      ✅ <strong>Use CSS Grid</strong> for full page layouts with header, sidebar, footer<br>
+      ✅ <strong>Use CSS Grid</strong> for card grids and multi-column designs<br>
+      ✅ <strong>Use both together</strong> — Grid for layout, Flexbox for components
+    </p>
+
+    <div class="callout">
+      <p><strong>Golden Rule:</strong> If you're thinking in one direction (row OR column), use Flexbox. If you're thinking in two directions (rows AND columns), use Grid.</p>
+    </div>
+
+    <hr class="divider">
+
+    <h2>Summary</h2>
+    <p>Both Flexbox and CSS Grid are essential tools for modern web development. Flexbox is your go-to for one-dimensional layouts like navbars and component alignment. CSS Grid is your go-to for two-dimensional layouts like full page structures and card grids.</p>
+    <p>The best developers don't choose one over the other — they use both together, picking the right tool for each layer of the design. Master both, and your CSS will become dramatically cleaner and more maintainable.</p>
+
+  </div>
+
+  <a class="next-article" href="async-await.html">
+    <div>
+      <div class="next-label">Related Article</div>
+      <div class="next-title">Mastering Async/Await in JavaScript</div>
+    </div>
+    <span style="font-size:1.2rem;color:var(--accent)">→</span>
+  </a>
+</div>
+
+<footer>
+  <span class="footer-logo">CodePulse</span>
+  <span class="footer-copy">© 2026</span>
+</footer>
+</body>
+</html>
