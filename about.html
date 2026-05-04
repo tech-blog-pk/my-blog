@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>About Us — CodePulse</title>
+<meta name="description" content="CodePulse is a tech and coding blog dedicated to helping developers learn JavaScript, Python, CSS, and AI through practical, in-depth articles.">
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Fraunces:ital,wght@0,300;0,600;1,300&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root { --bg: #f7f6f2; --ink: #1a1a18; --muted: #888880; --accent: #2d6a4f; --accent-light: #d8f3dc; --line: #e0dfd8; --card-bg: #ffffff; --tag-bg: #eeeee8; }
+  body { background: var(--bg); color: var(--ink); font-family: 'DM Sans', sans-serif; font-weight: 300; line-height: 1.7; }
+  nav { position: sticky; top: 0; z-index: 100; background: rgba(247,246,242,0.92); backdrop-filter: blur(12px); border-bottom: 1px solid var(--line); padding: 0 2rem; display: flex; align-items: center; justify-content: space-between; height: 60px; }
+  .logo { font-family: 'DM Mono', monospace; font-size: 1rem; font-weight: 500; color: var(--ink); text-decoration: none; display: flex; align-items: center; gap: 8px; }
+  .logo span { display: inline-block; width: 8px; height: 8px; background: var(--accent); border-radius: 50%; animation: pulse 2s ease-in-out infinite; }
+  @keyframes pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.4); opacity: 0.6; } }
+  .back-btn { font-size: 0.82rem; color: var(--muted); text-decoration: none; transition: color 0.2s; }
+  .back-btn:hover { color: var(--ink); }
+
+  .page-wrap { max-width: 720px; margin: 0 auto; padding: 60px 2rem 100px; opacity: 0; transform: translateY(20px); animation: fadeUp 0.7s ease forwards 0.1s; }
+  @keyframes fadeUp { to { opacity: 1; transform: translateY(0); } }
+
+  .page-label { font-family: 'DM Mono', monospace; font-size: 0.72rem; letter-spacing: 0.12em; color: var(--accent); text-transform: uppercase; margin-bottom: 1rem; }
+  .page-title { font-family: 'Fraunces', serif; font-size: clamp(2rem, 5vw, 2.8rem); font-weight: 600; line-height: 1.2; color: var(--ink); margin-bottom: 1.5rem; }
+
+  .divider { border: none; border-top: 1px solid var(--line); margin: 2.5rem 0; }
+
+  p { font-size: 0.95rem; color: #333330; line-height: 1.85; margin-bottom: 1.3rem; }
+  strong { font-weight: 500; color: var(--ink); }
+  h2 { font-family: 'Fraunces', serif; font-size: 1.5rem; font-weight: 600; color: var(--ink); margin: 2.5rem 0 1rem; }
+
+  /* Team card */
+  .team-card { background: var(--card-bg); border: 1px solid var(--line); border-radius: 12px; padding: 2rem; display: flex; align-items: center; gap: 1.5rem; margin: 1.5rem 0; }
+  .team-avatar { width: 64px; height: 64px; border-radius: 50%; background: var(--accent-light); display: flex; align-items: center; justify-content: center; font-size: 1.2rem; font-weight: 600; color: var(--accent); font-family: 'DM Mono', monospace; flex-shrink: 0; }
+  .team-name { font-family: 'Fraunces', serif; font-size: 1.1rem; font-weight: 600; color: var(--ink); margin-bottom: 4px; }
+  .team-role { font-size: 0.78rem; color: var(--accent); font-family: 'DM Mono', monospace; letter-spacing: 0.06em; text-transform: uppercase; margin-bottom: 0.5rem; }
+  .team-bio { font-size: 0.85rem; color: var(--muted); line-height: 1.6; margin: 0; }
+
+  /* Topics grid */
+  .topics-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem; margin: 1.5rem 0; }
+  .topic-card { background: var(--card-bg); border: 1px solid var(--line); border-radius: 10px; padding: 1.2rem; }
+  .topic-icon { font-size: 1.4rem; margin-bottom: 0.5rem; }
+  .topic-name { font-weight: 500; font-size: 0.9rem; color: var(--ink); margin-bottom: 4px; }
+  .topic-desc { font-size: 0.78rem; color: var(--muted); line-height: 1.5; margin: 0; }
+
+  /* Stats */
+  .stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; margin: 1.5rem 0; }
+  .stat-card { background: var(--accent-light); border-radius: 10px; padding: 1.2rem; text-align: center; }
+  .stat-num { font-family: 'Fraunces', serif; font-size: 2rem; font-weight: 600; color: var(--accent); line-height: 1; }
+  .stat-label { font-size: 0.72rem; color: #2d6a4f; margin-top: 4px; font-family: 'DM Mono', monospace; }
+
+  .callout { background: var(--accent-light); border-left: 3px solid var(--accent); border-radius: 0 8px 8px 0; padding: 1rem 1.2rem; margin: 1.5rem 0; }
+  .callout p { margin: 0; font-size: 0.88rem; color: #1a4a35; }
+  .callout strong { color: var(--accent); }
+
+  .cta-btn { display: inline-block; background: var(--ink); color: var(--bg); padding: 12px 24px; border-radius: 100px; font-size: 0.88rem; font-weight: 500; text-decoration: none; transition: background 0.2s; margin-top: 1rem; }
+  .cta-btn:hover { background: var(--accent); }
+
+  footer { border-top: 1px solid var(--line); padding: 2rem; display: flex; align-items: center; justify-content: space-between; max-width: 720px; margin: 0 auto; }
+  .footer-logo { font-family: 'DM Mono', monospace; font-size: 0.85rem; color: var(--muted); }
+  .footer-copy { font-size: 0.72rem; color: var(--line); }
+
+  @media (max-width: 600px) {
+    .team-card { flex-direction: column; text-align: center; }
+    .topics-grid { grid-template-columns: 1fr; }
+    .stats-grid { grid-template-columns: repeat(3, 1fr); }
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <a class="logo" href="index.html"><span></span>CodePulse</a>
+  <a class="back-btn" href="index.html">← Back to Home</a>
+</nav>
+
+<div class="page-wrap">
+
+  <p class="page-label">// About Us</p>
+  <h1 class="page-title">We write code. We explain it clearly.</h1>
+
+  <p>Welcome to <strong>CodePulse</strong> — a tech and coding blog built for developers who want to go deeper. We don't just cover the basics. We dig into the patterns, pitfalls, and performance tricks that make the difference between code that works and code that excels.</p>
+
+  <p>Whether you're just starting your coding journey or you're a seasoned developer looking to sharpen your skills, CodePulse has something for you. Every article is written with one goal: <strong>make complex topics simple, practical, and actionable.</strong></p>
+
+  <div class="stats-grid">
+    <div class="stat-card">
+      <div class="stat-num">48+</div>
+      <div class="stat-label">Articles</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-num">12k</div>
+      <div class="stat-label">Readers</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-num">4</div>
+      <div class="stat-label">Topics</div>
+    </div>
+  </div>
+
+  <hr class="divider">
+
+  <h2>What We Cover</h2>
+  <p>Our content focuses on four core areas of modern software development:</p>
+
+  <div class="topics-grid">
+    <div class="topic-card">
+      <div class="topic-icon">⚡</div>
+      <div class="topic-name">JavaScript</div>
+      <p class="topic-desc">Async patterns, React hooks, performance optimization, and modern JS features.</p>
+    </div>
+    <div class="topic-card">
+      <div class="topic-icon">🐍</div>
+      <div class="topic-name">Python</div>
+      <p class="topic-desc">From beginner fundamentals to AI pipelines, data processing, and automation.</p>
+    </div>
+    <div class="topic-card">
+      <div class="topic-icon">🎨</div>
+      <div class="topic-name">CSS & Design</div>
+      <p class="topic-desc">Layout systems, animations, responsive design, and modern CSS techniques.</p>
+    </div>
+    <div class="topic-card">
+      <div class="topic-icon">🤖</div>
+      <div class="topic-name">AI & ML</div>
+      <p class="topic-desc">Practical AI applications, machine learning concepts, and LLM integrations.</p>
+    </div>
+  </div>
+
+  <hr class="divider">
+
+  <h2>Meet the Author</h2>
+
+  <div class="team-card">
+    <div class="team-avatar">AK</div>
+    <div>
+      <div class="team-name">Ali Khan</div>
+      <div class="team-role">// Founder & Lead Writer</div>
+      <p class="team-bio">Ali is a full-stack developer with a passion for teaching. He has been writing about web development and software engineering for over 5 years. His goal is to make complex technical topics accessible to developers at every level.</p>
+    </div>
+  </div>
+
+  <hr class="divider">
+
+  <h2>Our Mission</h2>
+  <p>The internet is full of tutorials that show you <em>what</em> to do but rarely explain <em>why</em>. At CodePulse, we believe understanding the "why" is what separates good developers from great ones.</p>
+  <p>Every article we publish goes beyond surface-level explanations. We cover the edge cases, the performance implications, and the real-world patterns that experienced developers use every day.</p>
+
+  <div class="callout">
+    <p><strong>Our promise:</strong> Every article on CodePulse is written from scratch, thoroughly researched, and tested with real code. No AI-generated fluff, no copy-paste tutorials — just honest, practical content.</p>
+  </div>
+
+  <hr class="divider">
+
+  <h2>Get in Touch</h2>
+  <p>Have a topic you'd like us to cover? Found an error in one of our articles? Want to collaborate? We'd love to hear from you!</p>
+  <a class="cta-btn" href="contact.html">Contact Us →</a>
+
+</div>
+
+<footer>
+  <span class="footer-logo">CodePulse</span>
+  <span class="footer-copy">© 2026</span>
+</footer>
+
+</body>
+</html>
