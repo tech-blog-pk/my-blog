@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="A complete beginner's guide to JavaScript Promises — chaining, error handling, and real-world async patterns explained clearly.">
+<title>JavaScript Promises: A Complete Beginner's Guide | CodePulse</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Fraunces:ital,wght@0,300;0,600;1,300&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root { --bg: #f7f6f2; --ink: #1a1a18; --muted: #888880; --accent: #2d6a4f; --accent-light: #d8f3dc; --line: #e0dfd8; --card-bg: #ffffff; --tag-bg: #eeeee8; }
+  html { scroll-behavior: smooth; }
+  body { background: var(--bg); color: var(--ink); font-family: 'DM Sans', sans-serif; font-weight: 300; line-height: 1.7; min-height: 100vh; }
+
+  nav { position: sticky; top: 0; z-index: 100; background: rgba(247,246,242,0.92); backdrop-filter: blur(12px); border-bottom: 1px solid var(--line); padding: 0 2rem; display: flex; align-items: center; justify-content: space-between; height: 60px; }
+  .logo { font-family: 'DM Mono', monospace; font-size: 1rem; font-weight: 500; color: var(--ink); text-decoration: none; display: flex; align-items: center; gap: 8px; }
+  .logo span { display: inline-block; width: 8px; height: 8px; background: var(--accent); border-radius: 50%; animation: pulse 2s ease-in-out infinite; }
+  @keyframes pulse { 0%,100%{transform:scale(1);opacity:1;} 50%{transform:scale(1.4);opacity:0.6;} }
+  .nav-links { display: flex; gap: 2rem; list-style: none; }
+  .nav-links a { text-decoration: none; color: var(--muted); font-size: 0.85rem; letter-spacing: 0.04em; transition: color 0.2s; }
+  .nav-links a:hover { color: var(--ink); }
+  .hamburger { display: none; flex-direction: column; gap: 5px; cursor: pointer; background: none; border: none; padding: 4px; }
+  .hamburger span { display: block; width: 22px; height: 2px; background: var(--ink); border-radius: 2px; }
+  .mobile-menu { display: none; position: fixed; top: 60px; left: 0; right: 0; background: var(--bg); border-bottom: 1px solid var(--line); padding: 1.5rem 2rem; z-index: 99; flex-direction: column; gap: 1rem; box-shadow: 0 8px 24px rgba(0,0,0,0.08); }
+  .mobile-menu.open { display: flex; }
+  .mobile-menu a { text-decoration: none; color: var(--ink); font-size: 1rem; padding: 0.6rem 0; border-bottom: 1px solid var(--line); }
+  .mobile-menu a:last-child { border-bottom: none; }
+  .mobile-menu a:hover { color: var(--accent); }
+
+  @keyframes fadeUp { to { opacity: 1; transform: translateY(0); } }
+
+  .article-wrap { max-width: 720px; margin: 0 auto; padding: 60px 2rem 100px; }
+
+  .back-link { display: inline-flex; align-items: center; gap: 6px; font-size: 0.8rem; color: var(--muted); text-decoration: none; margin-bottom: 2.5rem; transition: color 0.2s; }
+  .back-link:hover { color: var(--accent); }
+
+  .article-tags { display: flex; gap: 6px; margin-bottom: 1rem; opacity: 0; transform: translateY(16px); animation: fadeUp 0.6s ease forwards 0.1s; }
+  .tag { background: var(--tag-bg); color: var(--muted); font-size: 0.7rem; padding: 3px 10px; border-radius: 100px; font-family: 'DM Mono', monospace; }
+
+  .article-title { font-family: 'Fraunces', serif; font-size: clamp(1.8rem, 4vw, 2.6rem); font-weight: 600; line-height: 1.2; color: var(--ink); margin-bottom: 1rem; opacity: 0; transform: translateY(16px); animation: fadeUp 0.6s ease forwards 0.2s; }
+
+  .article-meta { display: flex; align-items: center; gap: 1rem; padding-bottom: 2rem; border-bottom: 1px solid var(--line); margin-bottom: 2.5rem; opacity: 0; transform: translateY(16px); animation: fadeUp 0.6s ease forwards 0.25s; }
+  .author-dot { width: 32px; height: 32px; border-radius: 50%; background: var(--accent-light); display: flex; align-items: center; justify-content: center; font-size: 0.7rem; font-weight: 600; color: var(--accent); }
+  .meta-text { font-size: 0.82rem; color: var(--muted); }
+  .read-time { margin-left: auto; font-family: 'DM Mono', monospace; font-size: 0.72rem; color: var(--muted); background: var(--tag-bg); padding: 4px 10px; border-radius: 100px; }
+
+  .article-body { opacity: 0; transform: translateY(16px); animation: fadeUp 0.6s ease forwards 0.3s; }
+  .article-body p { font-size: 1rem; color: var(--ink); line-height: 1.85; margin-bottom: 1.4rem; }
+  .article-body h2 { font-family: 'Fraunces', serif; font-size: 1.5rem; font-weight: 600; color: var(--ink); margin: 2.5rem 0 1rem; }
+  .article-body h3 { font-family: 'Fraunces', serif; font-size: 1.15rem; font-weight: 600; color: var(--ink); margin: 2rem 0 0.8rem; }
+  .article-body ul, .article-body ol { padding-left: 1.4rem; margin-bottom: 1.4rem; }
+  .article-body li { font-size: 1rem; line-height: 1.8; margin-bottom: 0.3rem; }
+  .article-body strong { font-weight: 500; }
+
+  pre { background: var(--ink); border-radius: 10px; padding: 1.5rem; margin: 1.5rem 0; overflow-x: auto; }
+  code { font-family: 'DM Mono', monospace; font-size: 0.82rem; color: #d8f3dc; line-height: 1.7; }
+  p code, li code { background: var(--tag-bg); padding: 2px 6px; border-radius: 4px; font-size: 0.82rem; color: var(--accent); font-family: 'DM Mono', monospace; }
+
+  .callout { background: var(--accent-light); border-left: 3px solid var(--accent); border-radius: 0 8px 8px 0; padding: 1rem 1.2rem; margin: 1.5rem 0; font-size: 0.9rem; }
+
+  .related { margin-top: 4rem; padding-top: 2rem; border-top: 1px solid var(--line); }
+  .related-title { font-family: 'DM Mono', monospace; font-size: 0.72rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); margin-bottom: 1.5rem; }
+  .related-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+  .related-card { background: var(--card-bg); border: 1px solid var(--line); border-radius: 10px; padding: 1.2rem; text-decoration: none; color: inherit; transition: transform 0.2s, box-shadow 0.2s; }
+  .related-card:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(0,0,0,0.06); }
+  .related-card h4 { font-family: 'Fraunces', serif; font-size: 1rem; font-weight: 600; color: var(--ink); margin-bottom: 0.3rem; line-height: 1.3; }
+  .related-card p { font-size: 0.78rem; color: var(--muted); }
+
+  footer { border-top: 1px solid var(--line); padding: 2rem; display: flex; align-items: center; justify-content: space-between; max-width: 900px; margin: 0 auto; flex-wrap: wrap; gap: 1rem; }
+  .footer-logo { font-family: 'DM Mono', monospace; font-size: 0.85rem; color: var(--muted); }
+  .footer-links { display: flex; gap: 1.5rem; }
+  .footer-links a { font-size: 0.78rem; color: var(--muted); text-decoration: none; }
+  .footer-links a:hover { color: var(--ink); }
+  .footer-copy { font-size: 0.72rem; color: var(--muted); }
+
+  @media (max-width: 700px) {
+    .nav-links { display: none; }
+    .hamburger { display: flex; }
+    .related-grid { grid-template-columns: 1fr; }
+    footer { flex-direction: column; align-items: flex-start; }
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <a class="logo" href="index.html"><span></span>CodePulse</a>
+  <ul class="nav-links">
+    <li><a href="index.html">Articles</a></li>
+    <li><a href="about.html">About</a></li>
+    <li><a href="contact.html">Contact</a></li>
+  </ul>
+  <button class="hamburger" onclick="toggleMenu()"><span></span><span></span><span></span></button>
+</nav>
+<div class="mobile-menu" id="mobileMenu">
+  <a href="index.html" onclick="toggleMenu()">🏠 Home</a>
+  <a href="about.html" onclick="toggleMenu()">👤 About</a>
+  <a href="contact.html" onclick="toggleMenu()">✉️ Contact</a>
+  <a href="privacy-policy.html" onclick="toggleMenu()">🔒 Privacy Policy</a>
+</div>
+
+<div class="article-wrap">
+  <a class="back-link" href="index.html">← Back to all articles</a>
+
+  <div class="article-tags">
+    <span class="tag">JavaScript</span>
+    <span class="tag">Promises</span>
+    <span class="tag">Async</span>
+  </div>
+
+  <h1 class="article-title">JavaScript Promises: A Complete Beginner's Guide</h1>
+
+  <div class="article-meta">
+    <div class="author-dot">MK</div>
+    <span class="meta-text">Malik Khan · May 3, 2026</span>
+    <span class="read-time">9 min read</span>
+  </div>
+
+  <div class="article-body">
+
+    <p>If you've written any JavaScript beyond the basics, you've run into Promises. Maybe you've used them without fully understanding what's happening under the hood. That's what this guide is for — a clear, practical explanation of how Promises work, and how to use them well.</p>
+
+    <h2>What Problem Do Promises Solve?</h2>
+    <p>JavaScript is single-threaded, which means it can only do one thing at a time. But many operations — fetching data from an API, reading a file, querying a database — take time. If JavaScript just waited (blocked) for each of these to finish, your app would freeze.</p>
+    <p>The old solution was <strong>callbacks</strong>: pass a function that gets called when the work is done. This worked, but it quickly became unreadable when you had multiple async operations depending on each other — a problem so common it earned the name "callback hell."</p>
+    <p>Promises were introduced in ES2015 to fix this. A Promise represents a value that isn't available yet but will be resolved (or rejected) in the future.</p>
+
+    <h2>The Three States of a Promise</h2>
+    <p>Every Promise is in one of three states at any given time:</p>
+    <ul>
+      <li><strong>Pending:</strong> The operation hasn't completed yet.</li>
+      <li><strong>Fulfilled:</strong> The operation succeeded and the Promise has a value.</li>
+      <li><strong>Rejected:</strong> The operation failed and the Promise has a reason (error).</li>
+    </ul>
+    <p>Once a Promise moves from pending to either fulfilled or rejected, it's <em>settled</em> — and it stays that way. It can't go back to pending, and it can't switch from fulfilled to rejected.</p>
+
+    <h2>Creating a Promise</h2>
+    <p>You create a Promise by passing a function (the executor) to the <code>Promise</code> constructor. That function receives two arguments: <code>resolve</code> and <code>reject</code>.</p>
+
+<pre><code>const myPromise = new Promise((resolve, reject) => {
+  // simulate async work
+  setTimeout(() => {
+    const success = true;
+
+    if (success) {
+      resolve('Data loaded successfully');
+    } else {
+      reject(new Error('Something went wrong'));
+    }
+  }, 1000);
+});</code></pre>
+
+    <p>Call <code>resolve(value)</code> when the work succeeds. Call <code>reject(error)</code> when it fails. Simple.</p>
+
+    <h2>Consuming Promises with .then() and .catch()</h2>
+    <p>To use the value from a Promise, you chain <code>.then()</code>. To handle errors, you use <code>.catch()</code>.</p>
+
+<pre><code>myPromise
+  .then((result) => {
+    console.log(result); // 'Data loaded successfully'
+  })
+  .catch((error) => {
+    console.error(error.message); // 'Something went wrong'
+  });</code></pre>
+
+    <p>The key insight: <code>.then()</code> also returns a Promise, which means you can chain them.</p>
+
+    <h2>Chaining Promises</h2>
+    <p>This is where Promises shine over callbacks. Instead of nesting functions inside functions, you chain <code>.then()</code> calls in a flat, readable sequence.</p>
+
+<pre><code>fetchUser(userId)
+  .then((user) => fetchUserPosts(user.id))
+  .then((posts) => filterPublished(posts))
+  .then((published) => {
+    console.log('Published posts:', published);
+  })
+  .catch((error) => {
+    // any error from any step lands here
+    console.error('Failed:', error.message);
+  });</code></pre>
+
+    <div class="callout">
+      <strong>Important:</strong> A single <code>.catch()</code> at the end of a chain will catch errors from any step above it. This makes error handling much cleaner than the callback approach.
+    </div>
+
+    <h2>Promise.all() — Run Multiple Promises in Parallel</h2>
+    <p>If you have multiple independent async operations, don't run them one after the other — run them at the same time.</p>
+
+<pre><code>const [users, posts, comments] = await Promise.all([
+  fetchUsers(),
+  fetchPosts(),
+  fetchComments()
+]);
+
+// all three finish before this line runs</code></pre>
+
+    <p><code>Promise.all()</code> resolves when <em>all</em> the Promises resolve. If any one of them rejects, the whole thing rejects immediately. Use it when you need all results before continuing.</p>
+
+    <h2>Promise.allSettled() — When You Want All Results Regardless</h2>
+    <p>Sometimes you want to run multiple Promises and get all results — even if some fail. That's what <code>Promise.allSettled()</code> is for.</p>
+
+<pre><code>const results = await Promise.allSettled([
+  fetchUsers(),
+  fetchPosts(),
+  fetchComments()
+]);
+
+results.forEach((result) => {
+  if (result.status === 'fulfilled') {
+    console.log('Success:', result.value);
+  } else {
+    console.error('Failed:', result.reason);
+  }
+});</code></pre>
+
+    <h2>The Relationship Between Promises and Async/Await</h2>
+    <p>Async/await is not a different system — it's <strong>syntax sugar on top of Promises</strong>. Every <code>async</code> function returns a Promise. Every <code>await</code> expression unwraps a Promise.</p>
+
+<pre><code>// These two are equivalent:
+
+// Promise style
+fetchUser(id)
+  .then(user => console.log(user))
+  .catch(err => console.error(err));
+
+// Async/await style
+async function loadUser(id) {
+  try {
+    const user = await fetchUser(id);
+    console.log(user);
+  } catch (err) {
+    console.error(err);
+  }
+}</code></pre>
+
+    <p>Async/await is usually easier to read — especially for sequential operations. But understanding the underlying Promise mechanics helps you debug issues and write better code.</p>
+
+    <h2>Common Mistakes to Avoid</h2>
+
+    <h3>1. Forgetting to return in .then()</h3>
+    <p>If you forget to <code>return</code> inside a <code>.then()</code>, the next step in the chain gets <code>undefined</code> instead of your value.</p>
+
+<pre><code>// WRONG — next .then() gets undefined
+fetchUser(id)
+  .then((user) => {
+    fetchUserPosts(user.id); // forgot return!
+  })
+  .then((posts) => console.log(posts)); // undefined
+
+// CORRECT
+fetchUser(id)
+  .then((user) => {
+    return fetchUserPosts(user.id);
+  })
+  .then((posts) => console.log(posts));</code></pre>
+
+    <h3>2. Not handling errors</h3>
+    <p>An unhandled Promise rejection will crash Node.js and silently swallow errors in the browser. Always add a <code>.catch()</code> — or wrap your <code>await</code> calls in <code>try/catch</code>.</p>
+
+    <h2>Summary</h2>
+    <p>Promises give JavaScript a clean way to handle asynchronous operations. Key things to remember:</p>
+    <ul>
+      <li>A Promise is either pending, fulfilled, or rejected</li>
+      <li>Use <code>.then()</code> for success and <code>.catch()</code> for errors</li>
+      <li>Chain <code>.then()</code> calls instead of nesting callbacks</li>
+      <li>Use <code>Promise.all()</code> to run independent operations in parallel</li>
+      <li>Async/await is built on top of Promises — learn both</li>
+    </ul>
+    <p>Once Promises click, the rest of async JavaScript becomes much easier to reason about. Happy coding.</p>
+
+  </div>
+
+  <div class="related">
+    <p class="related-title">// Read next</p>
+    <div class="related-grid">
+      <a class="related-card" href="async-await.html">
+        <h4>Mastering Async/Await: Patterns You're Probably Missing</h4>
+        <p>Parallel execution, error boundaries, and cancellation patterns.</p>
+      </a>
+      <a class="related-card" href="css-grid-vs-flexbox.html">
+        <h4>CSS Grid vs Flexbox: When to Use Each One</h4>
+        <p>A clear decision framework for every layout scenario.</p>
+      </a>
+    </div>
+  </div>
+</div>
+
+<footer>
+  <span class="footer-logo">CodePulse</span>
+  <div class="footer-links">
+    <a href="about.html">About</a>
+    <a href="contact.html">Contact</a>
+    <a href="privacy-policy.html">Privacy Policy</a>
+  </div>
+  <span class="footer-copy">© 2026 CodePulse — Built by Malik Khan</span>
+</footer>
+
+<script>
+function toggleMenu() {
+  document.getElementById('mobileMenu').classList.toggle('open');
+}
+</script>
+</body>
+</html>
