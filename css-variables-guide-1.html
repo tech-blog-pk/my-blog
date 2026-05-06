@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="Learn how to use CSS Custom Properties (variables) to write cleaner, more maintainable stylesheets. Practical examples included.">
+<title>CSS Custom Properties: Stop Hard-Coding Your Styles | CodePulse</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Fraunces:ital,wght@0,300;0,600;1,300&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root { --bg: #f7f6f2; --ink: #1a1a18; --muted: #888880; --accent: #2d6a4f; --accent-light: #d8f3dc; --line: #e0dfd8; --card-bg: #ffffff; --tag-bg: #eeeee8; }
+  html { scroll-behavior: smooth; }
+  body { background: var(--bg); color: var(--ink); font-family: 'DM Sans', sans-serif; font-weight: 300; line-height: 1.7; min-height: 100vh; }
+  nav { position: sticky; top: 0; z-index: 100; background: rgba(247,246,242,0.92); backdrop-filter: blur(12px); border-bottom: 1px solid var(--line); padding: 0 2rem; display: flex; align-items: center; justify-content: space-between; height: 60px; }
+  .logo { font-family: 'DM Mono', monospace; font-size: 1rem; font-weight: 500; color: var(--ink); text-decoration: none; display: flex; align-items: center; gap: 8px; }
+  .logo span { display: inline-block; width: 8px; height: 8px; background: var(--accent); border-radius: 50%; animation: pulse 2s ease-in-out infinite; }
+  @keyframes pulse { 0%,100%{transform:scale(1);opacity:1;} 50%{transform:scale(1.4);opacity:0.6;} }
+  .nav-links { display: flex; gap: 2rem; list-style: none; }
+  .nav-links a { text-decoration: none; color: var(--muted); font-size: 0.85rem; letter-spacing: 0.04em; transition: color 0.2s; }
+  .nav-links a:hover { color: var(--ink); }
+  .hamburger { display: none; flex-direction: column; gap: 5px; cursor: pointer; background: none; border: none; padding: 4px; }
+  .hamburger span { display: block; width: 22px; height: 2px; background: var(--ink); border-radius: 2px; }
+  .mobile-menu { display: none; position: fixed; top: 60px; left: 0; right: 0; background: var(--bg); border-bottom: 1px solid var(--line); padding: 1.5rem 2rem; z-index: 99; flex-direction: column; gap: 1rem; box-shadow: 0 8px 24px rgba(0,0,0,0.08); }
+  .mobile-menu.open { display: flex; }
+  .mobile-menu a { text-decoration: none; color: var(--ink); font-size: 1rem; padding: 0.6rem 0; border-bottom: 1px solid var(--line); }
+  .mobile-menu a:last-child { border-bottom: none; }
+  .mobile-menu a:hover { color: var(--accent); }
+  @keyframes fadeUp { to { opacity: 1; transform: translateY(0); } }
+  .article-wrap { max-width: 720px; margin: 0 auto; padding: 60px 2rem 100px; }
+  .back-link { display: inline-flex; align-items: center; gap: 6px; font-size: 0.8rem; color: var(--muted); text-decoration: none; margin-bottom: 2.5rem; transition: color 0.2s; }
+  .back-link:hover { color: var(--accent); }
+  .article-tags { display: flex; gap: 6px; margin-bottom: 1rem; opacity: 0; transform: translateY(16px); animation: fadeUp 0.6s ease forwards 0.1s; }
+  .tag { background: var(--tag-bg); color: var(--muted); font-size: 0.7rem; padding: 3px 10px; border-radius: 100px; font-family: 'DM Mono', monospace; }
+  .article-title { font-family: 'Fraunces', serif; font-size: clamp(1.8rem, 4vw, 2.6rem); font-weight: 600; line-height: 1.2; color: var(--ink); margin-bottom: 1rem; opacity: 0; transform: translateY(16px); animation: fadeUp 0.6s ease forwards 0.2s; }
+  .article-meta { display: flex; align-items: center; gap: 1rem; padding-bottom: 2rem; border-bottom: 1px solid var(--line); margin-bottom: 2.5rem; opacity: 0; transform: translateY(16px); animation: fadeUp 0.6s ease forwards 0.25s; }
+  .author-dot { width: 32px; height: 32px; border-radius: 50%; background: var(--accent-light); display: flex; align-items: center; justify-content: center; font-size: 0.7rem; font-weight: 600; color: var(--accent); }
+  .meta-text { font-size: 0.82rem; color: var(--muted); }
+  .read-time { margin-left: auto; font-family: 'DM Mono', monospace; font-size: 0.72rem; color: var(--muted); background: var(--tag-bg); padding: 4px 10px; border-radius: 100px; }
+  .article-body { opacity: 0; transform: translateY(16px); animation: fadeUp 0.6s ease forwards 0.3s; }
+  .article-body p { font-size: 1rem; color: var(--ink); line-height: 1.85; margin-bottom: 1.4rem; }
+  .article-body h2 { font-family: 'Fraunces', serif; font-size: 1.5rem; font-weight: 600; color: var(--ink); margin: 2.5rem 0 1rem; }
+  .article-body h3 { font-family: 'Fraunces', serif; font-size: 1.15rem; font-weight: 600; color: var(--ink); margin: 2rem 0 0.8rem; }
+  .article-body ul, .article-body ol { padding-left: 1.4rem; margin-bottom: 1.4rem; }
+  .article-body li { font-size: 1rem; line-height: 1.8; margin-bottom: 0.3rem; }
+  pre { background: var(--ink); border-radius: 10px; padding: 1.5rem; margin: 1.5rem 0; overflow-x: auto; }
+  code { font-family: 'DM Mono', monospace; font-size: 0.82rem; color: #d8f3dc; line-height: 1.7; }
+  p code, li code { background: var(--tag-bg); padding: 2px 6px; border-radius: 4px; font-size: 0.82rem; color: var(--accent); font-family: 'DM Mono', monospace; }
+  .callout { background: var(--accent-light); border-left: 3px solid var(--accent); border-radius: 0 8px 8px 0; padding: 1rem 1.2rem; margin: 1.5rem 0; font-size: 0.9rem; }
+  .related { margin-top: 4rem; padding-top: 2rem; border-top: 1px solid var(--line); }
+  .related-title { font-family: 'DM Mono', monospace; font-size: 0.72rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); margin-bottom: 1.5rem; }
+  .related-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+  .related-card { background: var(--card-bg); border: 1px solid var(--line); border-radius: 10px; padding: 1.2rem; text-decoration: none; color: inherit; transition: transform 0.2s, box-shadow 0.2s; }
+  .related-card:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(0,0,0,0.06); }
+  .related-card h4 { font-family: 'Fraunces', serif; font-size: 1rem; font-weight: 600; color: var(--ink); margin-bottom: 0.3rem; line-height: 1.3; }
+  .related-card p { font-size: 0.78rem; color: var(--muted); }
+  footer { border-top: 1px solid var(--line); padding: 2rem; display: flex; align-items: center; justify-content: space-between; max-width: 900px; margin: 0 auto; flex-wrap: wrap; gap: 1rem; }
+  .footer-logo { font-family: 'DM Mono', monospace; font-size: 0.85rem; color: var(--muted); }
+  .footer-links { display: flex; gap: 1.5rem; }
+  .footer-links a { font-size: 0.78rem; color: var(--muted); text-decoration: none; }
+  .footer-links a:hover { color: var(--ink); }
+  .footer-copy { font-size: 0.72rem; color: var(--muted); }
+  @media (max-width: 700px) { .nav-links{display:none;} .hamburger{display:flex;} .related-grid{grid-template-columns:1fr;} footer{flex-direction:column;align-items:flex-start;} }
+</style>
+</head>
+<body>
+<nav>
+  <a class="logo" href="index.html"><span></span>CodePulse</a>
+  <ul class="nav-links">
+    <li><a href="index.html">Articles</a></li>
+    <li><a href="about.html">About</a></li>
+    <li><a href="contact.html">Contact</a></li>
+  </ul>
+  <button class="hamburger" onclick="toggleMenu()"><span></span><span></span><span></span></button>
+</nav>
+<div class="mobile-menu" id="mobileMenu">
+  <a href="index.html" onclick="toggleMenu()">🏠 Home</a>
+  <a href="about.html" onclick="toggleMenu()">👤 About</a>
+  <a href="contact.html" onclick="toggleMenu()">✉️ Contact</a>
+  <a href="privacy-policy.html" onclick="toggleMenu()">🔒 Privacy Policy</a>
+</div>
+
+<div class="article-wrap">
+  <a class="back-link" href="index.html">← Back to all articles</a>
+  <div class="article-tags">
+    <span class="tag">CSS</span><span class="tag">Variables</span><span class="tag">Best Practices</span>
+  </div>
+  <h1 class="article-title">CSS Custom Properties: Stop Hard-Coding Your Styles</h1>
+  <div class="article-meta">
+    <div class="author-dot">MK</div>
+    <span class="meta-text">Malik Khan · May 5, 2026</span>
+    <span class="read-time">7 min read</span>
+  </div>
+
+  <div class="article-body">
+    <p>If you're still writing <code>color: #2d6a4f</code> in fifteen different places across your stylesheet, this article is for you. CSS Custom Properties — often called CSS variables — are one of the most useful features in modern CSS, and they're underused by a lot of developers who learned CSS before they existed.</p>
+
+    <h2>What Are CSS Custom Properties?</h2>
+    <p>CSS Custom Properties let you define a value once and reuse it across your entire stylesheet. If you need to change it, you change it in one place — and it updates everywhere.</p>
+
+<pre><code>/* Define your variables on :root */
+:root {
+  --color-brand: #2d6a4f;
+  --color-bg: #f7f6f2;
+  --font-mono: 'DM Mono', monospace;
+  --spacing-lg: 2rem;
+}
+
+/* Use them anywhere */
+.button {
+  background: var(--color-brand);
+  font-family: var(--font-mono);
+  padding: var(--spacing-lg);
+}</code></pre>
+
+    <p>The syntax is two dashes before the name (<code>--name</code>) for defining, and <code>var(--name)</code> for using. That's the whole syntax.</p>
+
+    <h2>Why Not Just Use Sass Variables?</h2>
+    <p>This is a fair question. Sass variables (<code>$color: red;</code>) have existed for years. But CSS Custom Properties have one massive advantage: they're <strong>live in the browser</strong>.</p>
+    <p>Sass variables are compiled away before the browser sees them. CSS Custom Properties exist at runtime, which means:</p>
+    <ul>
+      <li>You can change them with JavaScript</li>
+      <li>They respect the cascade and can be scoped to specific elements</li>
+      <li>They work with media queries and pseudo-classes</li>
+      <li>No build step required</li>
+    </ul>
+
+    <h2>Scoping Variables to Elements</h2>
+    <p>You're not limited to <code>:root</code>. You can define a variable on any element, and it will only apply within that element's subtree.</p>
+
+<pre><code>/* Global default */
+:root {
+  --card-bg: #ffffff;
+}
+
+/* Override for dark sections */
+.dark-section {
+  --card-bg: #1a1a18;
+}
+
+.card {
+  background: var(--card-bg); /* automatically picks up local value */
+}</code></pre>
+
+    <div class="callout">
+      This scoping behaviour is what makes CSS Custom Properties more powerful than preprocessor variables for theming.
+    </div>
+
+    <h2>Dark Mode in 10 Lines</h2>
+    <p>CSS variables make implementing dark mode surprisingly clean. Define your light theme on <code>:root</code>, then override the variables inside a media query.</p>
+
+<pre><code>:root {
+  --bg: #ffffff;
+  --text: #1a1a18;
+  --border: #e0e0e0;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #1a1a18;
+    --text: #f7f6f2;
+    --border: #333330;
+  }
+}
+
+body {
+  background: var(--bg);
+  color: var(--text);
+}</code></pre>
+
+    <p>Every element that uses these variables will automatically switch when the user's OS is in dark mode. No JavaScript required.</p>
+
+    <h2>Changing Variables with JavaScript</h2>
+    <p>Because CSS Custom Properties are live, you can read and write them from JavaScript. This is great for things like user-controlled themes or animation-driven UI.</p>
+
+<pre><code>// Read a variable
+const brand = getComputedStyle(document.documentElement)
+  .getPropertyValue('--color-brand');
+
+// Write a variable
+document.documentElement.style
+  .setProperty('--color-brand', '#52b788');
+
+// All elements using --color-brand update instantly!</code></pre>
+
+    <h2>Fallback Values</h2>
+    <p>The <code>var()</code> function accepts a second argument as a fallback, used when the variable isn't defined.</p>
+
+<pre><code>.card {
+  /* Use --card-radius if defined, otherwise 8px */
+  border-radius: var(--card-radius, 8px);
+}</code></pre>
+
+    <p>This is useful for building component libraries where consumers can optionally override your defaults.</p>
+
+    <h2>Practical: Build a Design Token System</h2>
+    <p>The best use of CSS Custom Properties is as a design token system — a central source of truth for every visual decision in your project.</p>
+
+<pre><code>:root {
+  /* Colors */
+  --color-primary: #2d6a4f;
+  --color-primary-light: #d8f3dc;
+  --color-neutral-100: #f7f6f2;
+  --color-neutral-900: #1a1a18;
+
+  /* Typography */
+  --font-sans: 'DM Sans', sans-serif;
+  --font-mono: 'DM Mono', monospace;
+  --font-serif: 'Fraunces', serif;
+  --text-sm: 0.85rem;
+  --text-base: 1rem;
+  --text-lg: 1.2rem;
+
+  /* Spacing */
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-4: 1rem;
+  --space-8: 2rem;
+
+  /* Radius */
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-full: 100px;
+}</code></pre>
+
+    <p>With a system like this, your entire design becomes consistent by default. Changing the primary brand colour means updating one line.</p>
+
+    <h2>What to Watch Out For</h2>
+    <ul>
+      <li><strong>Invalid values:</strong> If a variable contains an invalid value for a property, the browser uses the property's inherited or initial value — it doesn't throw an error, which can make bugs hard to spot.</li>
+      <li><strong>No calc() short-hand:</strong> You can use variables inside <code>calc()</code>, but the variable must include the unit: <code>var(--size)</code> → <code>16px</code>, not <code>16</code>.</li>
+      <li><strong>Browser support:</strong> Full support in all modern browsers. IE11 does not support them — but if you're still targeting IE11, you have bigger problems.</li>
+    </ul>
+
+    <h2>Summary</h2>
+    <p>CSS Custom Properties are not just a convenience feature. Used well, they give you a maintainable design system, effortless theming, and live JavaScript integration — all in native CSS. Start by moving your repeated colours and font stacks to <code>:root</code> variables. You'll immediately feel the difference.</p>
+  </div>
+
+  <div class="related">
+    <p class="related-title">// Read next</p>
+    <div class="related-grid">
+      <a class="related-card" href="css-grid-vs-flexbox.html">
+        <h4>CSS Grid vs Flexbox: When to Use Each One</h4>
+        <p>A clear decision framework for every layout scenario.</p>
+      </a>
+      <a class="related-card" href="javascript-promises-guide.html">
+        <h4>JavaScript Promises: A Complete Beginner's Guide</h4>
+        <p>Chaining, error handling, and async patterns explained clearly.</p>
+      </a>
+    </div>
+  </div>
+</div>
+
+<footer>
+  <span class="footer-logo">CodePulse</span>
+  <div class="footer-links">
+    <a href="about.html">About</a>
+    <a href="contact.html">Contact</a>
+    <a href="privacy-policy.html">Privacy Policy</a>
+  </div>
+  <span class="footer-copy">© 2026 CodePulse — Built by Malik Khan</span>
+</footer>
+<script>
+function toggleMenu() { document.getElementById('mobileMenu').classList.toggle('open'); }
+</script>
+</body>
+</html>
