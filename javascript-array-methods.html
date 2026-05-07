@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="A complete guide to JavaScript Array Methods — map, filter, reduce, find, and more with real-world examples every developer should know.">
+<title>JavaScript Array Methods Every Developer Should Know | CodePulse</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Fraunces:ital,wght@0,300;0,600;1,300&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root { --bg: #f7f6f2; --ink: #1a1a18; --muted: #888880; --accent: #2d6a4f; --accent-light: #d8f3dc; --line: #e0dfd8; --card-bg: #ffffff; --tag-bg: #eeeee8; }
+  html { scroll-behavior: smooth; }
+  body { background: var(--bg); color: var(--ink); font-family: 'DM Sans', sans-serif; font-weight: 300; line-height: 1.7; min-height: 100vh; }
+
+  nav { position: sticky; top: 0; z-index: 100; background: rgba(247,246,242,0.92); backdrop-filter: blur(12px); border-bottom: 1px solid var(--line); padding: 0 2rem; display: flex; align-items: center; justify-content: space-between; height: 60px; }
+  .logo { font-family: 'DM Mono', monospace; font-size: 1rem; font-weight: 500; color: var(--ink); text-decoration: none; display: flex; align-items: center; gap: 8px; }
+  .logo span { display: inline-block; width: 8px; height: 8px; background: var(--accent); border-radius: 50%; animation: pulse 2s ease-in-out infinite; }
+  @keyframes pulse { 0%,100%{transform:scale(1);opacity:1;} 50%{transform:scale(1.4);opacity:0.6;} }
+  .nav-links { display: flex; gap: 2rem; list-style: none; }
+  .nav-links a { text-decoration: none; color: var(--muted); font-size: 0.85rem; letter-spacing: 0.04em; transition: color 0.2s; }
+  .nav-links a:hover { color: var(--ink); }
+  .hamburger { display: none; flex-direction: column; gap: 5px; cursor: pointer; background: none; border: none; padding: 4px; }
+  .hamburger span { display: block; width: 22px; height: 2px; background: var(--ink); border-radius: 2px; }
+  .mobile-menu { display: none; position: fixed; top: 60px; left: 0; right: 0; background: var(--bg); border-bottom: 1px solid var(--line); padding: 1.5rem 2rem; z-index: 99; flex-direction: column; gap: 1rem; box-shadow: 0 8px 24px rgba(0,0,0,0.08); }
+  .mobile-menu.open { display: flex; }
+  .mobile-menu a { text-decoration: none; color: var(--ink); font-size: 1rem; padding: 0.6rem 0; border-bottom: 1px solid var(--line); }
+  .mobile-menu a:last-child { border-bottom: none; }
+  .mobile-menu a:hover { color: var(--accent); }
+
+  @keyframes fadeUp { to { opacity: 1; transform: translateY(0); } }
+
+  .article-wrap { max-width: 720px; margin: 0 auto; padding: 60px 2rem 100px; }
+  .back-link { display: inline-flex; align-items: center; gap: 6px; font-size: 0.8rem; color: var(--muted); text-decoration: none; margin-bottom: 2.5rem; transition: color 0.2s; }
+  .back-link:hover { color: var(--accent); }
+
+  .article-tags { display: flex; gap: 6px; margin-bottom: 1rem; opacity: 0; transform: translateY(16px); animation: fadeUp 0.6s ease forwards 0.1s; }
+  .tag { background: var(--tag-bg); color: var(--muted); font-size: 0.7rem; padding: 3px 10px; border-radius: 100px; font-family: 'DM Mono', monospace; }
+
+  .article-title { font-family: 'Fraunces', serif; font-size: clamp(1.8rem, 4vw, 2.6rem); font-weight: 600; line-height: 1.2; color: var(--ink); margin-bottom: 1rem; opacity: 0; transform: translateY(16px); animation: fadeUp 0.6s ease forwards 0.2s; }
+
+  .article-meta { display: flex; align-items: center; gap: 1rem; padding-bottom: 2rem; border-bottom: 1px solid var(--line); margin-bottom: 2.5rem; opacity: 0; transform: translateY(16px); animation: fadeUp 0.6s ease forwards 0.25s; }
+  .author-dot { width: 32px; height: 32px; border-radius: 50%; background: var(--accent-light); display: flex; align-items: center; justify-content: center; font-size: 0.7rem; font-weight: 600; color: var(--accent); }
+  .meta-text { font-size: 0.82rem; color: var(--muted); }
+  .read-time { margin-left: auto; font-family: 'DM Mono', monospace; font-size: 0.72rem; color: var(--muted); background: var(--tag-bg); padding: 4px 10px; border-radius: 100px; }
+
+  /* Hero Image */
+  .article-hero-img {
+    width: 100%; border-radius: 12px; overflow: hidden;
+    margin-bottom: 2.5rem; border: 1px solid var(--line);
+    opacity: 0; transform: translateY(16px);
+    animation: fadeUp 0.6s ease forwards 0.28s;
+    background: linear-gradient(135deg, #1a1a18 0%, #2d6a4f 100%);
+    min-height: 220px; display: flex; align-items: center; justify-content: center;
+    position: relative; padding: 2.5rem;
+  }
+  .hero-img-inner {
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; width: 100%;
+  }
+  .method-pill {
+    background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15);
+    border-radius: 8px; padding: 0.8rem 1rem; text-align: center;
+  }
+  .method-name { font-family: 'DM Mono', monospace; font-size: 0.85rem; color: #74c69d; font-weight: 500; }
+  .method-desc { font-size: 0.7rem; color: rgba(255,255,255,0.45); margin-top: 3px; }
+  .img-label {
+    position: absolute; top: 1rem; left: 1rem;
+    font-family: 'DM Mono', monospace; font-size: 0.65rem;
+    letter-spacing: 0.1em; text-transform: uppercase;
+    color: rgba(255,255,255,0.35);
+  }
+
+  .article-body { opacity: 0; transform: translateY(16px); animation: fadeUp 0.6s ease forwards 0.3s; }
+  .article-body p { font-size: 1rem; color: var(--ink); line-height: 1.85; margin-bottom: 1.4rem; }
+  .article-body h2 { font-family: 'Fraunces', serif; font-size: 1.5rem; font-weight: 600; color: var(--ink); margin: 2.5rem 0 1rem; }
+  .article-body h3 { font-family: 'Fraunces', serif; font-size: 1.15rem; font-weight: 600; color: var(--ink); margin: 2rem 0 0.8rem; }
+  .article-body ul, .article-body ol { padding-left: 1.4rem; margin-bottom: 1.4rem; }
+  .article-body li { font-size: 1rem; line-height: 1.8; margin-bottom: 0.4rem; }
+  .article-body strong { font-weight: 500; }
+
+  pre { background: var(--ink); border-radius: 10px; padding: 1.5rem; margin: 1.5rem 0; overflow-x: auto; }
+  code { font-family: 'DM Mono', monospace; font-size: 0.82rem; color: #d8f3dc; line-height: 1.7; }
+  p code, li code { background: var(--tag-bg); padding: 2px 6px; border-radius: 4px; font-size: 0.82rem; color: var(--accent); font-family: 'DM Mono', monospace; }
+
+  .callout { background: var(--accent-light); border-left: 3px solid var(--accent); border-radius: 0 8px 8px 0; padding: 1rem 1.2rem; margin: 1.5rem 0; font-size: 0.9rem; }
+
+  .method-card { background: var(--card-bg); border: 1px solid var(--line); border-radius: 10px; padding: 1.5rem; margin: 1.5rem 0; }
+  .method-card-header { display: flex; align-items: center; gap: 10px; margin-bottom: 0.8rem; }
+  .method-badge { font-family: 'DM Mono', monospace; font-size: 0.78rem; background: var(--accent-light); color: var(--accent); padding: 4px 12px; border-radius: 100px; font-weight: 500; }
+  .method-card p { margin-bottom: 0; font-size: 0.9rem; }
+
+  .related { margin-top: 4rem; padding-top: 2rem; border-top: 1px solid var(--line); }
+  .related-title { font-family: 'DM Mono', monospace; font-size: 0.72rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); margin-bottom: 1.5rem; }
+  .related-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+  .related-card { background: var(--card-bg); border: 1px solid var(--line); border-radius: 10px; padding: 1.2rem; text-decoration: none; color: inherit; transition: transform 0.2s, box-shadow 0.2s; }
+  .related-card:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(0,0,0,0.06); }
+  .related-card h4 { font-family: 'Fraunces', serif; font-size: 1rem; font-weight: 600; color: var(--ink); margin-bottom: 0.3rem; line-height: 1.3; }
+  .related-card p { font-size: 0.78rem; color: var(--muted); }
+
+  footer { border-top: 1px solid var(--line); padding: 2rem; display: flex; align-items: center; justify-content: space-between; max-width: 900px; margin: 0 auto; flex-wrap: wrap; gap: 1rem; }
+  .footer-logo { font-family: 'DM Mono', monospace; font-size: 0.85rem; color: var(--muted); }
+  .footer-links { display: flex; gap: 1.5rem; }
+  .footer-links a { font-size: 0.78rem; color: var(--muted); text-decoration: none; }
+  .footer-links a:hover { color: var(--ink); }
+  .footer-copy { font-size: 0.72rem; color: var(--muted); }
+
+  @media (max-width: 700px) {
+    .nav-links { display: none; } .hamburger { display: flex; }
+    .hero-img-inner { grid-template-columns: repeat(2, 1fr); }
+    .related-grid { grid-template-columns: 1fr; }
+    footer { flex-direction: column; align-items: flex-start; }
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <a class="logo" href="index.html"><span></span>CodePulse</a>
+  <ul class="nav-links">
+    <li><a href="index.html">Articles</a></li>
+    <li><a href="about.html">About</a></li>
+    <li><a href="contact.html">Contact</a></li>
+  </ul>
+  <button class="hamburger" onclick="toggleMenu()"><span></span><span></span><span></span></button>
+</nav>
+<div class="mobile-menu" id="mobileMenu">
+  <a href="index.html" onclick="toggleMenu()">🏠 Home</a>
+  <a href="about.html" onclick="toggleMenu()">👤 About</a>
+  <a href="contact.html" onclick="toggleMenu()">✉️ Contact</a>
+  <a href="privacy-policy.html" onclick="toggleMenu()">🔒 Privacy Policy</a>
+</div>
+
+<div class="article-wrap">
+  <a class="back-link" href="index.html">← Back to all articles</a>
+
+  <div class="article-tags">
+    <span class="tag">JavaScript</span>
+    <span class="tag">Arrays</span>
+    <span class="tag">Beginner</span>
+  </div>
+
+  <h1 class="article-title">JavaScript Array Methods Every Developer Should Know</h1>
+
+  <div class="article-meta">
+    <div class="author-dot">MK</div>
+    <span class="meta-text">Malik Khan · May 7, 2026</span>
+    <span class="read-time">10 min read</span>
+  </div>
+
+  <!-- HERO IMAGE -->
+  <div class="article-hero-img">
+    <span class="img-label">// Array Methods Overview</span>
+    <div class="hero-img-inner">
+      <div class="method-pill">
+        <div class="method-name">.map()</div>
+        <div class="method-desc">Transform each item</div>
+      </div>
+      <div class="method-pill">
+        <div class="method-name">.filter()</div>
+        <div class="method-desc">Keep matching items</div>
+      </div>
+      <div class="method-pill">
+        <div class="method-name">.reduce()</div>
+        <div class="method-desc">Combine into one value</div>
+      </div>
+      <div class="method-pill">
+        <div class="method-name">.find()</div>
+        <div class="method-desc">Get first match</div>
+      </div>
+      <div class="method-pill">
+        <div class="method-name">.some()</div>
+        <div class="method-desc">Check if any match</div>
+      </div>
+      <div class="method-pill">
+        <div class="method-name">.every()</div>
+        <div class="method-desc">Check if all match</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="article-body">
+
+    <p>Arrays are everywhere in JavaScript. And once you move past basic <code>for</code> loops, you'll find a set of built-in array methods that make your code shorter, cleaner, and easier to read. This guide covers the ones you'll use every day — with real examples, not toy problems.</p>
+
+    <h2>Why Array Methods Over For Loops?</h2>
+    <p>There's nothing wrong with a <code>for</code> loop. But array methods have two big advantages: they're more expressive (the method name tells you what you're doing), and they return new arrays without mutating the original — which makes bugs much easier to track down.</p>
+
+<pre><code>const numbers = [1, 2, 3, 4, 5];
+
+// Old way — for loop
+const doubled = [];
+for (let i = 0; i < numbers.length; i++) {
+  doubled.push(numbers[i] * 2);
+}
+
+// New way — array method
+const doubled = numbers.map(n => n * 2);
+// [2, 4, 6, 8, 10]</code></pre>
+
+    <p>Same result. The second version is half the code and reads like plain English.</p>
+
+    <h2>1. .map() — Transform Every Item</h2>
+
+    <div class="method-card">
+      <div class="method-card-header">
+        <span class="method-badge">.map()</span>
+      </div>
+      <p>Creates a new array by applying a function to every item. The original array is never changed.</p>
+    </div>
+
+<pre><code>const prices = [100, 200, 350, 500];
+
+// Add 10% tax to every price
+const withTax = prices.map(price => price * 1.1);
+// [110, 220, 385, 550]
+
+// Real world: format user names
+const users = [
+  { firstName: 'Ahmed', lastName: 'Ali' },
+  { firstName: 'Sara', lastName: 'Khan' }
+];
+
+const fullNames = users.map(user =>
+  `${user.firstName} ${user.lastName}`
+);
+// ['Ahmed Ali', 'Sara Khan']</code></pre>
+
+    <p>Use <code>.map()</code> whenever you want to transform every item in an array into something else.</p>
+
+    <h2>2. .filter() — Keep Only What You Need</h2>
+
+    <div class="method-card">
+      <div class="method-card-header">
+        <span class="method-badge">.filter()</span>
+      </div>
+      <p>Creates a new array containing only the items where your function returns <code>true</code>.</p>
+    </div>
+
+<pre><code>const products = [
+  { name: 'Laptop', inStock: true, price: 1200 },
+  { name: 'Mouse', inStock: false, price: 25 },
+  { name: 'Keyboard', inStock: true, price: 80 },
+  { name: 'Monitor', inStock: false, price: 400 },
+];
+
+// Only in-stock products
+const available = products.filter(p => p.inStock);
+
+// Only affordable products (under $100)
+const affordable = products.filter(p => p.price < 100);
+
+// Combine both
+const affordableAndAvailable = products
+  .filter(p => p.inStock && p.price < 100);
+// [{ name: 'Keyboard', inStock: true, price: 80 }]</code></pre>
+
+    <div class="callout">
+      <strong>Tip:</strong> You can chain <code>.filter()</code> and <code>.map()</code> together. Filter first to reduce the array, then map to transform the results.
+    </div>
+
+    <h2>3. .reduce() — Combine Into One Value</h2>
+
+    <div class="method-card">
+      <div class="method-card-header">
+        <span class="method-badge">.reduce()</span>
+      </div>
+      <p>Reduces an entire array down to a single value — a number, string, object, or even another array.</p>
+    </div>
+
+<pre><code>const cart = [
+  { item: 'Shirt', price: 30 },
+  { item: 'Pants', price: 60 },
+  { item: 'Shoes', price: 90 },
+];
+
+// Calculate total price
+const total = cart.reduce((sum, product) => {
+  return sum + product.price;
+}, 0); // 0 is the starting value
+
+console.log(total); // 180
+
+// Count items by category
+const votes = ['yes', 'no', 'yes', 'yes', 'no'];
+const count = votes.reduce((tally, vote) => {
+  tally[vote] = (tally[vote] || 0) + 1;
+  return tally;
+}, {});
+// { yes: 3, no: 2 }</code></pre>
+
+    <p><code>.reduce()</code> is the most powerful and flexible array method. It can do anything the others can — but use the specific methods like <code>.map()</code> and <code>.filter()</code> when they fit, because they're easier to read.</p>
+
+    <h2>4. .find() — Get the First Match</h2>
+
+    <div class="method-card">
+      <div class="method-card-header">
+        <span class="method-badge">.find()</span>
+      </div>
+      <p>Returns the first item in the array that matches your condition. Returns <code>undefined</code> if nothing matches.</p>
+    </div>
+
+<pre><code>const users = [
+  { id: 1, name: 'Ahmed', role: 'admin' },
+  { id: 2, name: 'Sara', role: 'user' },
+  { id: 3, name: 'Malik', role: 'user' },
+];
+
+// Find user by ID
+const user = users.find(u => u.id === 2);
+// { id: 2, name: 'Sara', role: 'user' }
+
+// Find admin
+const admin = users.find(u => u.role === 'admin');
+// { id: 1, name: 'Ahmed', role: 'admin' }</code></pre>
+
+    <h2>5. .some() and .every() — Check Conditions</h2>
+
+    <div class="method-card">
+      <div class="method-card-header">
+        <span class="method-badge">.some()</span>
+      </div>
+      <p>Returns <code>true</code> if <strong>at least one</strong> item matches the condition.</p>
+    </div>
+
+    <div class="method-card">
+      <div class="method-card-header">
+        <span class="method-badge">.every()</span>
+      </div>
+      <p>Returns <code>true</code> only if <strong>all</strong> items match the condition.</p>
+    </div>
+
+<pre><code>const scores = [85, 92, 78, 96, 88];
+
+// Did anyone score above 90?
+const hasHighScore = scores.some(s => s > 90);
+// true (92 and 96 qualify)
+
+// Did everyone pass (score >= 75)?
+const allPassed = scores.every(s => s >= 75);
+// true
+
+// Practical: check if cart has out-of-stock items
+const cart = [
+  { name: 'Laptop', inStock: true },
+  { name: 'Case', inStock: false },
+];
+
+const canCheckout = cart.every(item => item.inStock);
+// false — can't checkout</code></pre>
+
+    <h2>6. .forEach() — Loop Without Returning</h2>
+    <p><code>.forEach()</code> runs a function on each item — but unlike <code>.map()</code>, it doesn't return a new array. Use it when you want to do something with each item (like logging or updating the DOM) without needing a result.</p>
+
+<pre><code>const notifications = ['Message received', 'Friend request', 'New comment'];
+
+notifications.forEach((note, index) => {
+  console.log(`${index + 1}. ${note}`);
+});
+// 1. Message received
+// 2. Friend request
+// 3. New comment</code></pre>
+
+    <h2>Chaining Methods Together</h2>
+    <p>The real power comes from chaining multiple methods. Each method returns a new array, so you can chain them one after another.</p>
+
+<pre><code>const employees = [
+  { name: 'Ahmed', dept: 'Engineering', salary: 80000 },
+  { name: 'Sara', dept: 'Design', salary: 70000 },
+  { name: 'Malik', dept: 'Engineering', salary: 95000 },
+  { name: 'Zara', dept: 'Design', salary: 75000 },
+];
+
+// Get total salary of Engineering dept only
+const engineeringSalaryTotal = employees
+  .filter(e => e.dept === 'Engineering')  // keep engineers
+  .map(e => e.salary)                      // extract salaries
+  .reduce((sum, s) => sum + s, 0);         // total them
+
+console.log(engineeringSalaryTotal); // 175000</code></pre>
+
+    <h2>Quick Reference</h2>
+    <ul>
+      <li><strong>.map(fn)</strong> — Transform every item → returns new array (same length)</li>
+      <li><strong>.filter(fn)</strong> — Keep items where fn returns true → returns new array (shorter)</li>
+      <li><strong>.reduce(fn, init)</strong> — Combine all items → returns single value</li>
+      <li><strong>.find(fn)</strong> — First item where fn returns true → returns item or undefined</li>
+      <li><strong>.some(fn)</strong> — Does any item match? → returns true/false</li>
+      <li><strong>.every(fn)</strong> — Do all items match? → returns true/false</li>
+      <li><strong>.forEach(fn)</strong> — Run fn on each item → returns nothing</li>
+    </ul>
+
+    <h2>Summary</h2>
+    <p>These seven methods cover 90% of what you'll need when working with arrays in JavaScript. Start using them and your code will immediately become shorter and easier to understand. The key rule: if you want to transform, use <code>.map()</code>. If you want to narrow down, use <code>.filter()</code>. If you want one final value, use <code>.reduce()</code>.</p>
+    <p>Practice by replacing your next <code>for</code> loop with one of these — you'll never look back.</p>
+
+  </div>
+
+  <div class="related">
+    <p class="related-title">// Read next</p>
+    <div class="related-grid">
+      <a class="related-card" href="async-await.html">
+        <h4>Mastering Async/Await: Patterns You're Probably Missing</h4>
+        <p>Level up your JavaScript with advanced async patterns.</p>
+      </a>
+      <a class="related-card" href="javascript-promises-guide.html">
+        <h4>JavaScript Promises: A Complete Beginner's Guide</h4>
+        <p>Understand how Promises work under the hood.</p>
+      </a>
+    </div>
+  </div>
+</div>
+
+<footer>
+  <span class="footer-logo">CodePulse</span>
+  <div class="footer-links">
+    <a href="about.html">About</a>
+    <a href="contact.html">Contact</a>
+    <a href="privacy-policy.html">Privacy Policy</a>
+  </div>
+  <span class="footer-copy">© 2026 CodePulse — Built by Malik Khan</span>
+</footer>
+
+<script>
+function toggleMenu() { document.getElementById('mobileMenu').classList.toggle('open'); }
+</script>
+</body>
+</html>
